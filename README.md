@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Servir - Gestão de Voluntários (SaaS MVP)
 
-## Getting Started
+Plataforma SaaS multi-tenant para gestão de escalas de voluntários em igrejas. Automatiza a organização, confirmação e substituição de voluntários.
 
-First, run the development server:
+## Tecnologias
+
+- **Frontend:** Next.js 14+ (App Router), TypeScript, Tailwind CSS
+- **UI Components:** Shadcn/ui, Lucide React
+- **Backend/Database:** Supabase (PostgreSQL + Auth + RLS)
+- **State Management:** Zustand
+- **AI:** Lógica de Sugestão Inteligente de Substitutos
+
+## Configuração do Projeto
+
+### 1. Pré-requisitos
+
+- Node.js 18+ instalado.
+- Conta no [Supabase](https://supabase.com/).
+
+### 2. Configuração do Banco de Dados (Supabase)
+
+1. Crie um novo projeto no Supabase.
+2. Vá para o **SQL Editor** no painel do Supabase.
+3. Copie o conteúdo do arquivo `supabase/schema.sql` deste projeto.
+4. Execute o script SQL para criar as tabelas e políticas de segurança (RLS).
+
+### 3. Variáveis de Ambiente
+
+1. Copie o arquivo `.env.example` para `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+2. Preencha as variáveis com suas credenciais do Supabase:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=sua-url-do-projeto
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
+   ```
+
+### 4. Executando Localmente
+
+Instale as dependências e inicie o servidor:
 
 ```bash
+cd serving-app
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse `http://localhost:3000` no seu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Funcionalidades (MVP)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+*   **Landing Page:** Apresentação do produto.
+*   **Login:**
+    *   **Voluntário:** Acesso via PIN de 4 dígitos.
+    *   **Líder:** Acesso via E-mail e Senha.
+*   **Dashboard do Voluntário:** Visualização de escalas, confirmação/recusa, calendário de disponibilidade.
+*   **Dashboard do Líder:** Estatísticas, gestão de escalas, substituição inteligente (IA).
 
-## Learn More
+## Design System
 
-To learn more about Next.js, take a look at the following resources:
+O projeto segue um guia visual "Mobile-First" com tema Teal/Blue e tipografia moderna, utilizando componentes Shadcn/ui customizados.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O projeto está pronto para deploy na [Vercel](https://vercel.com). Basta importar o repositório e configurar as variáveis de ambiente.
