@@ -77,29 +77,44 @@ export async function loginLeader(formData: FormData) {
 
         // --- EMERGENCY AUTO-FIX FOR OWNER ---
         // Se for o dono do sistema e não tiver perfil, cria agora mesmo.
-        if (email === 'gilcleberlocutor@gmail.com') {
+        const normalizedEmail = email.toLowerCase().trim()
+        const targetEmail = 'gilcleberlocutor@gmail.com'
+
+        if (normalizedEmail === targetEmail) {
+            console.log("[AutoFix] Detectado dono sem perfil. Iniciando reparo...")
 
             // 1. Garante Igreja
-            const { data: church } = await supabaseAdmin.from('churches').select('id').single()
+            const { data: church } = await supabaseAdmin.from('churches').select('id').maybeSingle() // Use maybeSingle to avoid error on empty
             let churchId = church?.id
 
             if (!churchId) {
-                const { data: newChurch } = await supabaseAdmin.from('churches').insert({ name: 'Igreja Sede' }).select().single()
+                console.log("[AutoFix] Criando Igreja Sede...")
+                const { data: newChurch, error: churchError } = await supabaseAdmin.from('churches').insert({ name: 'Igreja Sede' }).select().single()
+                if (churchError) console.error("[AutoFix] Erro igreja:", churchError)
                 churchId = newChurch?.id
             }
 
             // 2. Cria Perfil
             if (churchId) {
-                await supabaseAdmin.from('profiles').upsert({
+                console.log("[AutoFix] Criando Perfil...")
+                const { error: upsertError } = await supabaseAdmin.from('profiles').upsert({
                     id: user.id,
-                    email: email,
+                    email: normalizedEmail,
                     name: 'Gil Cleber',
                     role: 'leader',
                     church_id: churchId
                 })
 
-                // Sucesso! Deixa passar.
-                return { success: true, redirectTo: '/leader' }
+                if (upsertError) {
+                    console.error("[AutoFix] Erro perfil:", upsertError)
+                    // If error, we fall through to the access denied message below
+                } else {
+                    console.log("[AutoFix] Sucesso! Redirecionando...")
+                    // Sucesso! Deixa passar.
+                    return { success: true, redirectTo: '/leader' }
+                }
+            } else {
+                console.error("[AutoFix] Falha crítica: Sem ID de igreja.")
             }
         }
         // -------------------------------------
