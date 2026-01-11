@@ -39,6 +39,7 @@ export async function repairSystem() {
             logs.push("Criando Igreja Sede...")
             const { data: newChurch, error } = await supabaseAdmin.from('churches').insert({ name: 'Igreja Sede' }).select().single()
             if (error) throw new Error("Falha ao criar igreja: " + error.message)
+            if (!newChurch) throw new Error("Igreja criada mas não retornada.")
             church = newChurch
             logs.push("Igreja criada: " + church.id)
         } else {
