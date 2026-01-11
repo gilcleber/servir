@@ -52,7 +52,7 @@ export function ScheduleCard({
                 <CardTitle className="text-xl font-bold">{schedule.ministries?.name || 'Ministério'}</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <CalendarIcon className="w-4 h-4" />
                         <span>{schedule.date}</span>

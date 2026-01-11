@@ -1,27 +1,41 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin' // Needed to create Auth Users
 import { createHash } from 'crypto'
 
-export async function createVolunteer(name: string, email: string | null, ministries: string[], churchId: string) {
+export async function createVolunteer(name: string, email: string, ministries: string[], churchId: string) {
     const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
 
-    // 1. Generate 4-digit PIN
+    // 1. Generate PIN
     const pin = Math.floor(1000 + Math.random() * 9000).toString()
     const pinHash = createHash('sha256').update(pin).digest('hex')
 
-    // 2. Create Profile
-    // Note: Ideally we create Auth User first but for MVP/Pin-based we might just create Profile
-    // AND create a shadow auth user if we want full RLS.
-    // For now, let's insert into profiles. RLS might block if not generic 'admin_role'.
-    // We assume the logged in user is Leader/Admin.
+    // 2. Create Auth User
+    // We use the provided email or a generated one + PIN as password
+    const userEmail = email || `vol_${Date.now()}@servir.app`
 
-    const { data: profile, error } = await supabase
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: userEmail,
+        password: pin,
+        email_confirm: true,
+        user_metadata: { name, role: 'volunteer' }
+    })
+
+    if (authError || !authUser.user) {
+        return { error: 'Falha ao criar usuário de autenticação: ' + authError?.message }
+    }
+
+    // 3. Create Profile
+    // We insert into profiles using the Auth ID
+    const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
+            id: authUser.user.id, // Link to Auth User
             church_id: churchId,
             name,
-            email,
+            email: userEmail,
             role: 'volunteer',
             pin: pinHash, // Storing hashed
             ministry_ids: ministries
@@ -29,8 +43,9 @@ export async function createVolunteer(name: string, email: string | null, minist
         .select()
         .single()
 
-    if (error) return { error: error.message }
+    if (profileError) {
+        return { error: 'Falha ao criar perfil: ' + profileError.message }
+    }
 
-    // 3. Return the PIN so the admin can give it to the volunteer
     return { success: true, pin, profile }
 }

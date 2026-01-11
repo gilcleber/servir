@@ -17,8 +17,6 @@ export async function suggestSubstitutes(scheduleId: string, ministryId: string)
     if (!schedule) throw new Error("Escala não encontrada")
 
     // 2. Find volunteers in the same ministry
-    // Need to filter profiles where ministry_ids contains ministryId. 
-    // Supabase array column: ministry_ids @> {id}
     const { data: allVolunteers } = await supabase
         .from('profiles')
         .select('*')
@@ -30,12 +28,13 @@ export async function suggestSubstitutes(scheduleId: string, ministryId: string)
     }
 
     // 3. Check availability for that date
+    // Note: 'date' in DB is YYYY-MM-DD string roughly.
     const { data: availabilities } = await supabase
         .from('availability')
         .select('*')
-        .eq('date', schedule.date) // Assuming text match YYYY-MM-DD
+        .eq('date', schedule.date)
 
-    // 4. Check who is ALREADY assigned to this schedule (to exclude)
+    // 4. Check existing assignments
     const { data: existingAssignments } = await supabase
         .from('assignments')
         .select('profile_id')
@@ -45,54 +44,60 @@ export async function suggestSubstitutes(scheduleId: string, ministryId: string)
 
     // Filter candidates
     const candidates = allVolunteers.filter(vol => {
-        if (assignedIds.has(vol.id)) return false // Already assigned
+        if (assignedIds.has(vol.id)) return false
 
         const av = availabilities?.find(a => a.profile_id === vol.id)
-        if (av && av.status === 'unavailable') return false // marked unavailable
+        // If explicitly unavailable, skip. If available or uninformed, keep.
+        if (av && av.status === 'unavailable') return false
 
-        return true // Include available or uninformed
+        return true
     })
 
-    // 5. AI Ranking/Reasoning
-    let reasoning = "Sugestões baseadas na disponibilidade e ministério."
-    let rankedCandidates = candidates.slice(0, 3) // Default top 3
+    // 5. AI Ranking
+    let reasoning = "Sugestões baseadas na disponibilidade e ministério (padrão)."
+    let rankedCandidates = candidates.slice(0, 3)
 
-    const apiKey = process.env.GOOGLE_AI_KEY
+    const apiKey = process.env.GOOGLE_AI_API_KEY // key fix
     if (apiKey && candidates.length > 0) {
         try {
             const genAI = new GoogleGenerativeAI(apiKey)
             const model = genAI.getGenerativeModel({ model: "gemini-pro" })
 
             const prompt = `
-            Eu preciso de um substituto para uma escala de igreja.
-            Data: ${schedule.date}. Ministério ID: ${ministryId}.
+            Atue como um coordenador de voluntários de igreja.
+            Tarefa: Sugerir os 3 melhores substitutos para uma escala.
             
-            Candidatos disponíveis:
+            Contexto:
+            - Data da Escala: ${schedule.date}
+            - Ministério ID: ${ministryId}
+            
+            Lista de Candidatos Disponíveis (JSON):
             ${JSON.stringify(candidates.map(c => ({ id: c.id, name: c.name, ministries: c.ministry_ids })))}
             
-            Analise e retorne os top 3 candidatos ideais. 
-            Retorne APENAS um JSON array com os IDs dos 3 melhores, exemplo: ["id1", "id2"].
-          `
-            // Note: In real app, we would include "Last served date" to make AI smarter.
+            Critérios:
+            - Priorize quem serve neste ministério.
+            - Considere rotação (num cenário real).
+            
+            SAÍDA ESPERADA:
+            Apenas um JSON Array de strings com os IDs dos escolhidos, ex: ["uuid-1", "uuid-2"].
+            `
 
             const result = await model.generateContent(prompt)
             const response = result.response
             const text = response.text()
 
-            // Try to parse JSON
-            // This is fragile in MVP without strict JSON mode, but let's try regex extraction
+            // Robust JSON extraction
             const match = text.match(/\[[\s\S]*\]/)
             if (match) {
                 const ids = JSON.parse(match[0])
-                // Reorder candidates based on AI
                 const aiRanked = candidates.filter(c => ids.includes(c.id))
                 const others = candidates.filter(c => !ids.includes(c.id))
                 rankedCandidates = [...aiRanked, ...others].slice(0, 3)
-                reasoning = "Sugestões otimizadas por IA com base no perfil."
+                reasoning = "Sugestões analisadas e ranqueadas pela IA Gemini."
             }
         } catch (e) {
             console.error("AI Error:", e)
-            // Fallback to default order
+            reasoning += " (Falha na conexão com AI, exibindo ordem padrão)"
         }
     }
 

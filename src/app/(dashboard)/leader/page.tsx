@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { Bell, Settings, Plus, UserPlus } from "lucide-react"
 import { fetchLeaderStats, fetchActiveSchedules } from "@/actions/leader"
 import { createClient } from "@/lib/supabase/server"
-import { ScheduleListClient } from "./schedule-list-client" // Client component for interactivity
+import { ScheduleListClient } from "./schedule-list-client"
 
 export default async function LeaderDashboard() {
     const stats = await fetchLeaderStats()
@@ -16,7 +16,7 @@ export default async function LeaderDashboard() {
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
             {/* Top Bar */}
-            <header className="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+            <header className="bg-white border-b px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-10">
                 <div className="flex items-center gap-2">
                     <div className="bg-primary p-1.5 rounded-lg">
                         <div className="w-4 h-4 bg-white rounded-full opacity-50" />
@@ -29,7 +29,7 @@ export default async function LeaderDashboard() {
                 </div>
             </header>
 
-            <main className="p-6 max-w-4xl mx-auto space-y-8">
+            <main className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 md:space-y-8">
                 {/* Welcome */}
                 <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12 bg-pink-500">
@@ -42,21 +42,23 @@ export default async function LeaderDashboard() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-4">
-                    <Card className="bg-white shadow-sm border-0">
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-green-100 rounded-lg text-green-600 font-bold text-xl">{stats.confirmed}</div>
-                            <span className="text-sm font-medium text-muted-foreground">Confirmados</span>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-white shadow-sm border-0">
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-yellow-100 rounded-lg text-yellow-600 font-bold text-xl">{stats.pending}</div>
-                            <span className="text-sm font-medium text-muted-foreground">Pendentes</span>
-                        </CardContent>
-                    </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <Card className="bg-white shadow-sm border-0">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 bg-green-100 rounded-lg text-green-600 font-bold text-xl">{stats.confirmed}</div>
+                                <span className="text-sm font-medium text-muted-foreground">Confirmados</span>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-white shadow-sm border-0">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 bg-yellow-100 rounded-lg text-yellow-600 font-bold text-xl">{stats.pending}</div>
+                                <span className="text-sm font-medium text-muted-foreground">Pendentes</span>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                    <Card className="col-span-2 bg-white shadow-sm border-0">
+                    <Card className="bg-white shadow-sm border-0">
                         <CardContent className="p-4">
                             <div className="flex justify-between mb-2">
                                 <span className="text-sm font-medium text-muted-foreground">Taxa de Confirmação</span>
@@ -69,7 +71,7 @@ export default async function LeaderDashboard() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
                     <Button className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/10">
                         <Plus className="w-5 h-5 mr-2" /> Nova Escala
                     </Button>

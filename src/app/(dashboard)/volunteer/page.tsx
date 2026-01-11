@@ -17,7 +17,7 @@ export default async function VolunteerDashboard() {
     const firstName = profile?.name?.split(' ')[0] || 'Voluntário'
 
     return (
-        <div className="p-6 max-w-lg mx-auto space-y-8">
+        <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6 md:space-y-8">
             {/* Header */}
             <header className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -31,27 +31,28 @@ export default async function VolunteerDashboard() {
                 </div>
                 <Button size="icon" variant="ghost" className="relative">
                     <Bell className="w-6 h-6 text-gray-600" />
-                    {/* <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" /> */}
                 </Button>
             </header>
 
-            {/* Next Schedules */}
-            <section>
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="font-bold text-lg">Próximas Escalas</h2>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Next Schedules */}
+                <section>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="font-bold text-lg">Próximas Escalas</h2>
+                    </div>
 
-                {assignments.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">Nenhuma escala agendada.</p>
-                ) : (
-                    <DashboardClient assignments={assignments} />
-                )}
-            </section>
+                    {assignments.length === 0 ? (
+                        <p className="text-muted-foreground text-sm">Nenhuma escala agendada.</p>
+                    ) : (
+                        <DashboardClient assignments={assignments} />
+                    )}
+                </section>
 
-            {/* Availability */}
-            <section>
-                <AvailabilityCalendar />
-            </section>
+                {/* Availability */}
+                <section>
+                    <AvailabilityCalendar />
+                </section>
+            </div>
         </div>
     )
 }

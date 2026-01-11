@@ -39,28 +39,29 @@ export async function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname
 
-    // Public Routes
+    // Public Routes (Login, Public Assets)
     if (path === '/' || path.startsWith('/login') || path.startsWith('/auth')) {
-        // If logged in, redirect to appropriate dashboard
-        if (user) {
-            // Fetch role to decide where to go
-            // We can't easily fetch DB in middleware (performance).
-            // Check local storage or cookie? Or just let them go to the page and let the page redirect?
-            // Better: let them access login, but maybe sidebar handles it.
-            // For MVP, if user is present, we could check metadata if we put role there.
-            // Let's skip auto-redirect from login for now to keep it simple and safe.
-        }
         return response
     }
 
-    // Protected Routes
+    // Protected Routes Check
     if (!user) {
         return NextResponse.redirect(new URL('/login/volunteer', request.url))
     }
 
-    // Role Protection (Simplified)
-    // If fetching DB is needed, we usually do it in Layout or Page, not Middleware.
-    // Middleware mainly ensures "Authenticated".
+    // Role-Based Access Control (RBAC)
+    const userRole = user.user_metadata?.role || 'volunteer'
+
+    // Volunteer trying to access Leader pages
+    if (path.startsWith('/leader') && userRole === 'volunteer') {
+        return NextResponse.redirect(new URL('/volunteer', request.url))
+    }
+
+    // Logic for Leader/Admin accessing volunteer pages is usually allowed (or redirect to leader dash)
+    // For now, restrict strictly
+    // if (path.startsWith('/volunteer') && userRole !== 'volunteer') {
+    //    return NextResponse.redirect(new URL('/leader', request.url))
+    // }
 
     return response
 }
