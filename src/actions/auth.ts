@@ -74,6 +74,36 @@ export async function loginLeader(formData: FormData) {
     const allowedRoles = ['leader', 'admin', 'super_admin']
 
     if (!role || !allowedRoles.includes(role)) {
+
+        // --- EMERGENCY AUTO-FIX FOR OWNER ---
+        // Se for o dono do sistema e não tiver perfil, cria agora mesmo.
+        if (email === 'gilcleberlocutor@gmail.com') {
+
+            // 1. Garante Igreja
+            const { data: church } = await supabaseAdmin.from('churches').select('id').single()
+            let churchId = church?.id
+
+            if (!churchId) {
+                const { data: newChurch } = await supabaseAdmin.from('churches').insert({ name: 'Igreja Sede' }).select().single()
+                churchId = newChurch?.id
+            }
+
+            // 2. Cria Perfil
+            if (churchId) {
+                await supabaseAdmin.from('profiles').upsert({
+                    id: user.id,
+                    email: email,
+                    name: 'Gil Cleber',
+                    role: 'leader',
+                    church_id: churchId
+                })
+
+                // Sucesso! Deixa passar.
+                return { success: true, redirectTo: '/leader' }
+            }
+        }
+        // -------------------------------------
+
         // Critical Feedback: Tell the user WHY they are not entering
         // Also sign them out immediately to prevent stuck session
         await supabase.auth.signOut()
