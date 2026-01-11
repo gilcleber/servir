@@ -36,7 +36,7 @@ export async function repairSystem() {
         // 1. Ensure Church
         const { data: existingChurch } = await supabaseAdmin.from('churches').select('id').single()
         let churchId = existingChurch?.id
-        
+
         if (!churchId) {
             logs.push("Criando Igreja Sede...")
             const { data: newChurch, error } = await supabaseAdmin.from('churches').insert({ name: 'Igreja Sede' }).select().single()
@@ -79,6 +79,14 @@ export async function repairSystem() {
 export async function forceRepairLogin(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
+
+    // VALIDATION: Check if Service Role Key is configured correctly
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!serviceKey) return { error: "CONFIGURAÇÃO ERRO: 'SUPABASE_SERVICE_ROLE_KEY' não encontrada no ambiente." }
+    if (serviceKey === anonKey) return { error: "CONFIGURAÇÃO ERRO: Você colocou a chave pública no lugar da chave secreta (Service Role) no Vercel." }
+
     const supabaseAdmin = createAdminClient()
     const supabase = await createClient()
 
