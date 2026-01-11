@@ -56,13 +56,28 @@ export async function loginLeader(formData: FormData) {
     const password = formData.get('password') as string
     const supabase = await createClient()
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     })
 
     if (error) {
         return { error: 'Credenciais inválidas.' }
+    }
+
+    // SELF-HEALING: Ensure metadata is correct
+    if (user && (!user.user_metadata?.role || user.user_metadata?.role !== 'leader')) {
+        // Create Admin Client to read profile and update user
+        const supabaseAdmin = createAdminClient()
+        const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
+
+        if (profile?.role === 'leader') {
+            await supabaseAdmin.auth.admin.updateUserById(user.id, {
+                user_metadata: { role: 'leader' }
+            })
+            // Refresh session if possible, but middleware will need a refresh. 
+            // Ideally we just proceed, user might need one refresh.
+        }
     }
 
     return { success: true }

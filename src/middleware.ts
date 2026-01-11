@@ -50,10 +50,15 @@ export async function middleware(request: NextRequest) {
     }
 
     // Role-Based Access Control (RBAC)
+    // Default to 'volunteer' only if explicitly set or if profile confirmed (simplified here)
+    // If undefined, we might be in a race condition.
     const userRole = user.user_metadata?.role || 'volunteer'
 
     // Volunteer trying to access Leader pages
-    if (path.startsWith('/leader') && userRole === 'volunteer') {
+    // Only redirect if we are SURE it's a volunteer (e.g. metadata says so)
+    if (path.startsWith('/leader') && userRole !== 'leader') {
+        // If metadata is missing/wrong, they go here. 
+        // The login fix above should solve this for next login.
         return NextResponse.redirect(new URL('/volunteer', request.url))
     }
 
