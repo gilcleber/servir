@@ -38,9 +38,11 @@ export default function Home() {
             Crie escalas, confirme presenças e encontre substitutos em minutos, não horas.
           </p>
           <div className="flex gap-4 pt-2">
-            <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-900/10">
-              Começar Gratuitamente
-            </Button>
+            <Link href="/login/leader">
+              <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-900/10">
+                Começar Gratuitamente
+              </Button>
+            </Link>
             <Button size="lg" variant="outline" className="h-12 px-8 text-base bg-white">
               Ver Demonstração
             </Button>
@@ -148,7 +150,9 @@ export default function Home() {
           </div>
           <h2 className="text-3xl font-bold mb-4">Pronto para transformar a gestão de voluntários?</h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">Comece agora gratuitamente e veja como o Servir pode ajudar sua igreja a organizar escalas de forma muito mais eficiente.</p>
-          <Button size="lg" className="px-10 h-12 text-lg">Criar Conta Gratuita</Button>
+          <Link href="/login/leader">
+            <Button size="lg" className="px-10 h-12 text-lg">Criar Conta Gratuita</Button>
+          </Link>
         </div>
       </section>
 
