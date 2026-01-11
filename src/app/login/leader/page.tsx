@@ -105,7 +105,10 @@ export default function LeaderLoginPage() {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end">
+                            <div className="flex justify-between items-center">
+                                <Link href="/repair" className="text-xs text-red-500 font-bold hover:underline">
+                                    Problemas de Acesso?
+                                </Link>
                                 <a href="#" className="text-xs text-primary font-medium hover:underline">Esqueceu a senha?</a>
                             </div>
 
