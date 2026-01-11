@@ -1,0 +1,50 @@
+{
+  "node": {
+    "00003a7bd517c528d070944b580196dee4c1997e5f": {
+      "workers": {
+        "app/(dashboard)/leader/page": {
+          "moduleId": 89478,
+          "async": false,
+          "exportedName": "fetchActiveSchedules",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/leader/page": "rsc"
+      },
+      "exportedName": "fetchActiveSchedules",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts"
+    },
+    "007e26799dc6789170684d7742e82a32a69e9407fb": {
+      "workers": {
+        "app/(dashboard)/leader/page": {
+          "moduleId": 89478,
+          "async": false,
+          "exportedName": "fetchLeaderStats",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/leader/page": "rsc"
+      },
+      "exportedName": "fetchLeaderStats",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts"
+    },
+    "60b366b0c02dab3a52855c5004675f6a5a4fdac32a": {
+      "workers": {
+        "app/(dashboard)/leader/page": {
+          "moduleId": 89478,
+          "async": false,
+          "exportedName": "suggestSubstitutes",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/ai-substitute.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/leader/page": "action-browser"
+      },
+      "exportedName": "suggestSubstitutes",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/ai-substitute.ts"
+    }
+  },
+  "edge": {}
+}

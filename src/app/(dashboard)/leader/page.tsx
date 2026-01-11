@@ -1,11 +1,11 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Bell, Settings, Plus, UserPlus } from "lucide-react"
 import { fetchLeaderStats, fetchActiveSchedules } from "@/actions/leader"
 import { createClient } from "@/lib/supabase/server"
 import { ScheduleListClient } from "./schedule-list-client"
+import { DashboardHeader } from "@/components/layout/dashboard-header"
+import { LeaderActions } from "@/components/domain/leader-actions"
 
 export default async function LeaderDashboard() {
     const stats = await fetchLeaderStats()
@@ -13,30 +13,25 @@ export default async function LeaderDashboard() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    // Fetch profile for name
+    const { data: profile } = await supabase.from('profiles').select('name').eq('id', user?.id).single()
+
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
-            {/* Top Bar */}
-            <header className="bg-white border-b px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-                <div className="flex items-center gap-2">
-                    <div className="bg-primary p-1.5 rounded-lg">
-                        <div className="w-4 h-4 bg-white rounded-full opacity-50" />
-                    </div>
-                    <span className="font-bold text-lg text-primary">Servir</span>
-                </div>
-                <div className="flex gap-2">
-                    <Button size="icon" variant="ghost"><Bell className="w-5 h-5" /></Button>
-                    <Button size="icon" variant="ghost"><Settings className="w-5 h-5" /></Button>
-                </div>
-            </header>
+            <DashboardHeader
+                userEmail={user?.email}
+                userName={profile?.name || 'Líder'}
+                role="leader"
+            />
 
             <main className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 md:space-y-8">
                 {/* Welcome */}
                 <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12 bg-pink-500">
-                        <AvatarFallback>LD</AvatarFallback>
+                        <AvatarFallback>{profile?.name?.substring(0, 2).toUpperCase() || 'LD'}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <h1 className="font-bold text-xl">Olá, Líder!</h1>
+                        <h1 className="font-bold text-xl">Olá, {profile?.name || 'Líder'}!</h1>
                         <p className="text-sm text-muted-foreground">{user?.email}</p>
                     </div>
                 </div>
@@ -71,14 +66,7 @@ export default async function LeaderDashboard() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col md:flex-row gap-4">
-                    <Button className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/10">
-                        <Plus className="w-5 h-5 mr-2" /> Nova Escala
-                    </Button>
-                    <Button variant="secondary" className="flex-1 h-12 text-base font-semibold bg-white border">
-                        <UserPlus className="w-5 h-5 mr-2" /> Voluntários
-                    </Button>
-                </div>
+                <LeaderActions />
 
                 {/* Active Schedules */}
                 <section>

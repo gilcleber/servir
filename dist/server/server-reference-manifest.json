@@ -1,0 +1,141 @@
+{
+  "node": {
+    "00003a7bd517c528d070944b580196dee4c1997e5f": {
+      "workers": {
+        "app/(dashboard)/leader/page": {
+          "moduleId": 89478,
+          "async": false,
+          "exportedName": "fetchActiveSchedules",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/leader/page": "rsc"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts",
+      "exportedName": "fetchActiveSchedules"
+    },
+    "007e26799dc6789170684d7742e82a32a69e9407fb": {
+      "workers": {
+        "app/(dashboard)/leader/page": {
+          "moduleId": 89478,
+          "async": false,
+          "exportedName": "fetchLeaderStats",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/leader/page": "rsc"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/leader.ts",
+      "exportedName": "fetchLeaderStats"
+    },
+    "60b366b0c02dab3a52855c5004675f6a5a4fdac32a": {
+      "workers": {
+        "app/(dashboard)/leader/page": {
+          "moduleId": 89478,
+          "async": false,
+          "exportedName": "suggestSubstitutes",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/ai-substitute.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/leader/page": "action-browser"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/ai-substitute.ts",
+      "exportedName": "suggestSubstitutes"
+    },
+    "60ee7acda191c218a46d8457560ddc09e953cd4b89": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "updateAvailability",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "rsc"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts",
+      "exportedName": "updateAvailability"
+    },
+    "60617a32d4d0233b57eff2a7979773999b0e432e7d": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "fetchAvailability",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "rsc"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts",
+      "exportedName": "fetchAvailability"
+    },
+    "00a366cc79344215c8165f4e222c86397672e1c57b": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "fetchVolunteerAssignments",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "rsc"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts",
+      "exportedName": "fetchVolunteerAssignments"
+    },
+    "602aa78b4cc028c9ac421d8cf247eab0452f217ed5": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "updateAssignmentStatus",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "action-browser"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts",
+      "exportedName": "updateAssignmentStatus"
+    },
+    "409862927df5e364bd5a3468ad19f7716bee5f69db": {
+      "workers": {
+        "app/login/leader/page": {
+          "moduleId": 94863,
+          "async": false,
+          "exportedName": "loginLeader",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/login/leader/page": "action-browser"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts",
+      "exportedName": "loginLeader"
+    },
+    "4077dce7a0bb8cc57621c9da8e3ce988441f33c10e": {
+      "workers": {
+        "app/login/volunteer/page": {
+          "moduleId": 66429,
+          "async": false,
+          "exportedName": "loginVolunteer",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/login/volunteer/page": "action-browser"
+      },
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts",
+      "exportedName": "loginVolunteer"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "Z2xwqUSqmCBmGdyB1wl+Y3mUc/vQNzkR434B1SK+VlA="
+}

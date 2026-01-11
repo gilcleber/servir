@@ -1,0 +1,65 @@
+{
+  "node": {
+    "60ee7acda191c218a46d8457560ddc09e953cd4b89": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "updateAvailability",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "rsc"
+      },
+      "exportedName": "updateAvailability",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+    },
+    "60617a32d4d0233b57eff2a7979773999b0e432e7d": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "fetchAvailability",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "rsc"
+      },
+      "exportedName": "fetchAvailability",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+    },
+    "00a366cc79344215c8165f4e222c86397672e1c57b": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "fetchVolunteerAssignments",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "rsc"
+      },
+      "exportedName": "fetchVolunteerAssignments",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+    },
+    "602aa78b4cc028c9ac421d8cf247eab0452f217ed5": {
+      "workers": {
+        "app/(dashboard)/volunteer/page": {
+          "moduleId": 95,
+          "async": false,
+          "exportedName": "updateAssignmentStatus",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/volunteer/page": "action-browser"
+      },
+      "exportedName": "updateAssignmentStatus",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/volunteer.ts"
+    }
+  },
+  "edge": {}
+}

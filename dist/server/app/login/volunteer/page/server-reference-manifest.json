@@ -1,0 +1,20 @@
+{
+  "node": {
+    "4077dce7a0bb8cc57621c9da8e3ce988441f33c10e": {
+      "workers": {
+        "app/login/volunteer/page": {
+          "moduleId": 66429,
+          "async": false,
+          "exportedName": "loginVolunteer",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/login/volunteer/page": "action-browser"
+      },
+      "exportedName": "loginVolunteer",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts"
+    }
+  },
+  "edge": {}
+}

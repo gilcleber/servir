@@ -1,0 +1,20 @@
+{
+  "node": {
+    "409862927df5e364bd5a3468ad19f7716bee5f69db": {
+      "workers": {
+        "app/login/leader/page": {
+          "moduleId": 94863,
+          "async": false,
+          "exportedName": "loginLeader",
+          "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/login/leader/page": "action-browser"
+      },
+      "exportedName": "loginLeader",
+      "filename": "Desktop/GIL CLEBER/SERVIR/serving-app/src/actions/auth.ts"
+    }
+  },
+  "edge": {}
+}
