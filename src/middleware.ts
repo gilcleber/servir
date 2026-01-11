@@ -39,8 +39,8 @@ export async function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname
 
-    // Public Routes (Login, Public Assets)
-    if (path === '/' || path.startsWith('/login') || path.startsWith('/auth')) {
+    // Public Routes (Login, Public Assets, Repair)
+    if (path === '/' || path.startsWith('/login') || path.startsWith('/auth') || path.startsWith('/repair')) {
         return response
     }
 
