@@ -1,5 +1,7 @@
 # Servir - Guia de Resgate e Configuração (MVP)
 
+> **Status do Deploy**: Master Branch Ativa - Deploy Confirmado.
+
 Este guia cobre a configuração completa para garantir que o Backend (Supabase) e o Frontend (Next.js) funcionem em sincronia.
 
 ## 1. Configuração do Backend (Supabase)
@@ -51,10 +53,11 @@ Acesse `http://localhost:3000`. Tente logar com o usuário criado.
 
 O projeto já está configurado para a Vercel.
 1. Certifique-se de adicionar as **mesmas variáveis de ambiente** no painel da Vercel (Project Settings > Environment Variables).
-2. O arquivo `next.config.ts` foi ajustado para gerar a pasta `dist`, corrigindo o erro anterior.
+2. O arquivo `next.config.ts` foi ajustado para usar a pasta padrão `.next`, compatível com o preset Next.js.
 
 ## Funcionalidades Chave
 
 - **Login Voluntário**: O Login por PIN requer que o perfil tenha um PIN Hash e que o usuário Auth exista. Para testes rápidos, use o Login de Líder (Email/Senha).
 - **IA**: O botão "Substituir (IA)" no Dashboard do Líder consultará a API do Google Gemini.
 - **Responsividade**: O layout foi ajustado para Mobile-First (testado em larguras pequenas).
+- **Favicon**: Ícone de Cruz Azul.
