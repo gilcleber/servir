@@ -55,21 +55,11 @@ export async function loginLeader(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
-    // 1. SELF-HEALING (Pre-Check): Ensure metadata is correct BEFORE creating session
-    // We use Admin client to peek at the profile
     const supabaseAdmin = createAdminClient()
-    const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('email', email).single()
-
-    if (profile && profile.role === 'leader') {
-        // Force update auth user metadata if needed
-        // We do this blindly to ensure it's always in sync
-        await supabaseAdmin.auth.admin.updateUserById(profile.id, {
-            user_metadata: { role: 'leader' }
-        })
-    }
+    // Select role and handle case/whitespace
+    const { data: profile } = await supabaseAdmin.from('profiles').select('id, role, name').eq('email', email).single()
 
     const supabase = await createClient()
-
     const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -79,13 +69,25 @@ export async function loginLeader(formData: FormData) {
         return { error: 'Credenciais inválidas.' }
     }
 
-    // Explicit Redirect Authority
-    // If the profile says leader, we send them to leader, regardless of what middleware thinks initially.
-    if (profile?.role === 'leader') {
-        return { success: true, redirectTo: '/leader' }
+    // Role Validation
+    const role = profile?.role?.toLowerCase().trim()
+    const allowedRoles = ['leader', 'admin', 'super_admin']
+
+    if (!role || !allowedRoles.includes(role)) {
+        // Critical Feedback: Tell the user WHY they are not entering
+        // Also sign them out immediately to prevent stuck session
+        await supabase.auth.signOut()
+        return { error: `Acesso negado. Seu perfil é: '${role || 'Não definido'}'. Necessário: 'leader'.` }
     }
 
-    return { success: true, redirectTo: '/volunteer' }
+    // Update Metadata to ensure Middleware is Happy
+    if (user && user.user_metadata?.role !== role) {
+        await supabaseAdmin.auth.admin.updateUserById(user.id, {
+            user_metadata: { role: role }
+        })
+    }
+
+    return { success: true, redirectTo: '/leader' }
 }
 
 export async function logout() {

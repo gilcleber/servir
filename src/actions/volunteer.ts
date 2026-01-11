@@ -99,9 +99,11 @@ export async function updateAvailability(date: string, status: 'available' | 'un
         .single()
 
     if (!profile) return { error: 'Perfil não encontrado.' }
-    if (!profile.church_id) return { error: 'Erro de cadastro: Igreja não vinculada.' }
+    if (!profile.church_id) {
+        return { error: 'Atenção: Seu cadastro não tem Igreja vinculada (church_id nulo).' }
+    }
 
-    const { error } = await supabase
+    const { error: upsertError } = await supabase
         .from('availability')
         .upsert({
             profile_id: profile.id,
@@ -112,9 +114,9 @@ export async function updateAvailability(date: string, status: 'available' | 'un
             onConflict: 'profile_id,date'
         })
 
-    if (error) {
-        console.error("Availability Update Error:", error)
-        return { error: 'Erro ao salvar disponibilidade.' }
+    if (upsertError) {
+        console.error("Availability Update Error:", upsertError)
+        return { error: `Erro DB: ${upsertError.message}` }
     }
     // Actually, passing church_id is safer/required if column is not nullable.
     // Let's fetch it.
