@@ -1,15 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Fix for Vercel 404: Use standard .next folder
-
-  // IGNORE ERRORS FOR DEPLOY
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Standard Next.js config
 };
 
 export default nextConfig;
