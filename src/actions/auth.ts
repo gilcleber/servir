@@ -54,6 +54,20 @@ export async function loginVolunteer(pin: string) {
 export async function loginLeader(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
+
+    // 1. SELF-HEALING (Pre-Check): Ensure metadata is correct BEFORE creating session
+    // We use Admin client to peek at the profile
+    const supabaseAdmin = createAdminClient()
+    const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('email', email).single()
+
+    if (profile && profile.role === 'leader') {
+        // Force update auth user metadata if needed
+        // We do this blindly to ensure it's always in sync
+        await supabaseAdmin.auth.admin.updateUserById(profile.id, {
+            user_metadata: { role: 'leader' }
+        })
+    }
+
     const supabase = await createClient()
 
     const { data: { user }, error } = await supabase.auth.signInWithPassword({
@@ -65,22 +79,13 @@ export async function loginLeader(formData: FormData) {
         return { error: 'Credenciais inválidas.' }
     }
 
-    // SELF-HEALING: Ensure metadata is correct
-    if (user && (!user.user_metadata?.role || user.user_metadata?.role !== 'leader')) {
-        // Create Admin Client to read profile and update user
-        const supabaseAdmin = createAdminClient()
-        const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
-
-        if (profile?.role === 'leader') {
-            await supabaseAdmin.auth.admin.updateUserById(user.id, {
-                user_metadata: { role: 'leader' }
-            })
-            // Refresh session if possible, but middleware will need a refresh. 
-            // Ideally we just proceed, user might need one refresh.
-        }
+    // Explicit Redirect Authority
+    // If the profile says leader, we send them to leader, regardless of what middleware thinks initially.
+    if (profile?.role === 'leader') {
+        return { success: true, redirectTo: '/leader' }
     }
 
-    return { success: true }
+    return { success: true, redirectTo: '/volunteer' }
 }
 
 export async function logout() {

@@ -98,7 +98,8 @@ export async function updateAvailability(date: string, status: 'available' | 'un
         .eq('email', user.email!)
         .single()
 
-    if (!profile) return { error: 'Profile not found' }
+    if (!profile) return { error: 'Perfil não encontrado.' }
+    if (!profile.church_id) return { error: 'Erro de cadastro: Igreja não vinculada.' }
 
     const { error } = await supabase
         .from('availability')
@@ -106,14 +107,15 @@ export async function updateAvailability(date: string, status: 'available' | 'un
             profile_id: profile.id,
             date,
             status,
-            church_id: profile.church_id // Assuming we fetch this or trigger handles it. 
-            // Trigger usually handles church_id if RLS forces it, 
-            // but for insert we might need it.
-            // Let's fetch church_id from profile.
+            church_id: profile.church_id
+        }, {
+            onConflict: 'profile_id,date'
         })
-    // We need to pass church_id explicitly if it's not default?
-    // Let's check schema. Usually RLS enforces visibility.
 
+    if (error) {
+        console.error("Availability Update Error:", error)
+        return { error: 'Erro ao salvar disponibilidade.' }
+    }
     // Actually, passing church_id is safer/required if column is not nullable.
     // Let's fetch it.
 

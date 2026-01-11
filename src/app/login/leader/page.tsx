@@ -33,7 +33,12 @@ export default function LeaderLoginPage() {
             toast.error("Erro ao entrar: " + result.error)
         } else {
             toast.success("Login realizado com sucesso!")
-            router.push("/leader")
+            // Force Hard Navigation to ensure middleware re-evaluates new cookie
+            if (result.redirectTo) {
+                window.location.href = result.redirectTo
+            } else {
+                router.push("/leader")
+            }
         }
         setIsLoading(false)
     }
