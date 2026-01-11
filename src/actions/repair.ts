@@ -34,16 +34,18 @@ export async function repairSystem() {
         logs.push("Iniciando reparo...")
 
         // 1. Ensure Church
-        let { data: church } = await supabaseAdmin.from('churches').select('id').single()
-        if (!church) {
+        const { data: existingChurch } = await supabaseAdmin.from('churches').select('id').single()
+        let churchId = existingChurch?.id
+        
+        if (!churchId) {
             logs.push("Criando Igreja Sede...")
             const { data: newChurch, error } = await supabaseAdmin.from('churches').insert({ name: 'Igreja Sede' }).select().single()
             if (error) throw new Error("Falha ao criar igreja: " + error.message)
             if (!newChurch) throw new Error("Igreja criada mas não retornada.")
-            church = newChurch
-            logs.push("Igreja criada: " + church.id)
+            churchId = newChurch.id
+            logs.push("Igreja criada: " + churchId)
         } else {
-            logs.push("Igreja encontrada: " + church.id)
+            logs.push("Igreja encontrada: " + churchId)
         }
 
         // 2. Find Auth User (or create if missing - requires admin.createUser)
