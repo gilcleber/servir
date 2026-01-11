@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // IGNORE ERRORS TO ENSURE DEPLOYMENT
+  distDir: 'dist',
   typescript: {
     ignoreBuildErrors: true,
   },
