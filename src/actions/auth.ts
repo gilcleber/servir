@@ -65,7 +65,7 @@ export async function loginLeader(formData: FormData) {
         password,
     })
 
-    if (error) {
+    if (error || !user) {
         return { error: 'Credenciais inválidas.' }
     }
 
