@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  distDir: 'dist',
+  // Standard Next.js output (defaults to .next)
+  // We remove 'distDir' because Vercel Next.js preset expects .next
+
   typescript: {
     ignoreBuildErrors: true,
   },
