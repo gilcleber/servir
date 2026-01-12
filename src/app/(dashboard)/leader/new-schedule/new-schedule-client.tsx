@@ -84,6 +84,21 @@ export function NewScheduleClient({ ministries, serviceTimes }: NewScheduleClien
         )
     }
 
+    const handleAddTime = async () => {
+        setIsLoading(true)
+        const result = await createServiceTime(newTimeDay, newTime, newTimeName)
+        if (result.error) {
+            toast.error(result.error)
+        } else {
+            toast.success("Horário adicionado!")
+            setShowTimeModal(false)
+            router.refresh()
+            // And pre-select it
+            if (result.id) setSelectedServiceTime(result.id)
+        }
+        setIsLoading(false)
+    }
+
     const handleCreate = async () => {
         if (selectedVolunteers.length === 0) {
             toast.error("Selecione pelo menos um voluntário")
