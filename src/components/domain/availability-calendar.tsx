@@ -44,7 +44,7 @@ export function AvailabilityCalendar() {
 
         const result = await updateAvailability(dateStr, nextStatus)
         if (!result.success) {
-            toast.error("Erro ao atualizar disponibilidade")
+            toast.error(result.error || "Erro ao atualizar disponibilidade")
             // Revert
             setAvailabilities(prev => ({ ...prev, [dateStr]: currentStatus }))
         }
