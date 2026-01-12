@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Trash2, Church, Clock, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { createMinistry, deleteMinistry, updateMinistry, createServiceTime, deleteServiceTime, updateServiceTime } from "@/actions/ministry"
+import { updateMinistryLeaders } from "@/actions/ministry-update"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
     Dialog,
     DialogContent,
@@ -43,7 +45,8 @@ export function SettingsClient({ ministries: _ministries, serviceTimes: _service
     // Ministry form
     const [ministryName, setMinistryName] = useState("")
     const [ministryDesc, setMinistryDesc] = useState("")
-    const [ministryLeader, setMinistryLeader] = useState("")
+    // const [ministryLeader, setMinistryLeader] = useState("") // Deprecated single leader
+    const [ministryLeaders, setMinistryLeaders] = useState<string[]>([])
 
     // Service time form
     const [stDay, setStDay] = useState("Domingo")
@@ -55,12 +58,13 @@ export function SettingsClient({ ministries: _ministries, serviceTimes: _service
             setEditingMinistry(ministry)
             setMinistryName(ministry.name)
             setMinistryDesc(ministry.description || "")
-            setMinistryLeader(ministry.leader_profile_id || "")
+            // Map existing leaders
+            setMinistryLeaders(ministry.leaders?.map((l: any) => l.id) || [])
         } else {
             setEditingMinistry(null)
             setMinistryName("")
             setMinistryDesc("")
-            setMinistryLeader("")
+            setMinistryLeaders([])
         }
         setShowMinistryModal(true)
     }
@@ -87,16 +91,31 @@ export function SettingsClient({ ministries: _ministries, serviceTimes: _service
         }
         setIsLoading(true)
 
+        let ministryId = editingMinistry?.id
         let result
+
         if (editingMinistry) {
-            result = await updateMinistry(editingMinistry.id, ministryName, ministryDesc, ministryLeader || undefined)
+            result = await updateMinistry(editingMinistry.id, ministryName, ministryDesc)
         } else {
-            result = await createMinistry(ministryName, ministryDesc, ministryLeader || undefined)
+            // Check createMinistry result to get ID? createMinistry currently doesn't return ID.
+            // I need to update createMinistry to return the ID.
+            // For now, let's assume I can fetch it or I need to fix createMinistry first.
+            // Let's modify createMinistry to return data.
+            // Assume it returns { success: true, data: { id: ... } }
+            result = await createMinistry(ministryName, ministryDesc)
+            // If I can't get ID, I can't assign leaders immediately on creation with this separate action.
+            // I'll need to modify createMinistry to handle leaders OR return ID.
+            // Let's modify createMinistry next. Assuming it returns `data`.
+            if (result.data) ministryId = result.data.id
         }
 
         if (result.error) {
             toast.error(result.error)
         } else {
+            // Update Leaders
+            if (ministryId) {
+                await updateMinistryLeaders(ministryId, ministryLeaders)
+            }
             toast.success(editingMinistry ? "Ministério atualizado!" : "Ministério criado!")
             setShowMinistryModal(false)
         }
@@ -192,11 +211,20 @@ export function SettingsClient({ ministries: _ministries, serviceTimes: _service
                                     <p className="text-sm text-muted-foreground mb-3">{m.description}</p>
                                 )}
                                 {m.leader && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Avatar className="h-6 w-6">
-                                            <AvatarFallback className="text-xs bg-primary/10 text-primary">{m.leader.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
-                                        </Avatar>
-                                        <span className="text-muted-foreground">Líder: <strong>{m.leader.name}</strong></span>
+                                    <div className="flex flex-col gap-1 text-sm mt-3">
+                                        <span className="text-xs font-semibold text-muted-foreground">Líderes:</span>
+                                        {m.leaders && m.leaders.length > 0 ? (
+                                            m.leaders.map((l: any) => (
+                                                <div key={l.id} className="flex items-center gap-2">
+                                                    <Avatar className="h-5 w-5">
+                                                        <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{l.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="text-muted-foreground">{l.name}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <span className="text-sm text-yellow-600">⚠️ Sem líder definido</span>
+                                        )}
                                     </div>
                                 )}
                                 {!m.leader && (
@@ -287,20 +315,30 @@ export function SettingsClient({ ministries: _ministries, serviceTimes: _service
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Líder Responsável</Label>
-                            <Select value={ministryLeader || "none"} onValueChange={(v) => setMinistryLeader(v === "none" ? "" : v)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecione um líder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">Nenhum</SelectItem>
-                                    {leaders.map((l) => (
-                                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">
-                                Apenas usuários com papel de "Líder" aparecem aqui. Cadastre líderes na aba Voluntários.
+                            <Label>Líderes Responsáveis</Label>
+                            <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto p-2 border rounded-md">
+                                {leaders.map((l) => (
+                                    <div key={l.id} className="flex items-center gap-2">
+                                        <Checkbox
+                                            id={`leader-${l.id}`}
+                                            checked={ministryLeaders.includes(l.id)}
+                                            onCheckedChange={(checked) => {
+                                                setMinistryLeaders(prev =>
+                                                    checked
+                                                        ? [...prev, l.id]
+                                                        : prev.filter(id => id !== l.id)
+                                                )
+                                            }}
+                                        />
+                                        <Label htmlFor={`leader-${l.id}`} className="cursor-pointer text-sm font-normal">
+                                            {l.name}
+                                        </Label>
+                                    </div>
+                                ))}
+                                {leaders.length === 0 && <p className="text-xs text-muted-foreground">Nenhum líder cadastrado na aba Voluntários.</p>}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                                Selecione quem gerencia este ministério.
                             </p>
                         </div>
                     </div>

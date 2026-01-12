@@ -126,7 +126,7 @@ export async function updateAvailability(date: string, status: 'available' | 'un
 
     if (upsertError) {
         console.error("Availability Update Error:", upsertError)
-        return { error: `Erro DB: ${upsertError.message}` }
+        return { error: `Erro ao salvar: ${upsertError.message || upsertError.details || 'Erro desconhecido'}` }
     }
     // Actually, passing church_id is safer/required if column is not nullable.
     // Let's fetch it.

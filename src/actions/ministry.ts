@@ -21,7 +21,7 @@ export async function createMinistry(name: string, description?: string, leaderI
     if (!profile?.church_id) return { error: 'Igreja não identificada.' }
 
     const supabaseAdmin = createAdminClient()
-    const { error } = await supabaseAdmin
+    const { data: ministry, error } = await supabaseAdmin
         .from('ministries')
         .insert({
             name,
@@ -29,12 +29,14 @@ export async function createMinistry(name: string, description?: string, leaderI
             leader_profile_id: leaderId || null,
             church_id: profile.church_id
         })
+        .select()
+        .single()
 
     if (error) return { error: 'Falha ao criar ministério: ' + error.message }
 
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
-    return { success: true }
+    return { success: true, data: ministry }
 }
 
 export async function updateMinistry(id: string, name: string, description?: string, leaderId?: string) {
@@ -77,16 +79,38 @@ export async function fetchAllMinistries() {
     const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
     if (!profile?.church_id) return []
 
-    const { data } = await supabase
+    const { data: ministries } = await supabase
         .from('ministries')
-        .select(`
-            *,
-            leader:leader_profile_id(name, email)
-        `)
+        .select('*')
         .eq('church_id', profile.church_id)
-        .order('name')
+        .order('name') as { data: any[] }
 
-    return data || []
+    if (!ministries) return []
+
+    // Fetch all leaders for this church to map them manually
+    const { data: allLeaders } = await supabase
+        .from('profiles')
+        .select('id, name, email, ministry_ids')
+        .eq('church_id', profile.church_id)
+        .eq('role', 'leader')
+
+    // Attach leaders to ministries
+    const ministriesWithLeaders = ministries.map(m => {
+        const ministryLeaders = allLeaders?.filter(l => l.ministry_ids?.includes(m.id)) || []
+        // Fallback to legacy leader_profile_id if valid and not already in list
+        if (m.leader_profile_id) {
+            const legacyLeader = allLeaders?.find(l => l.id === m.leader_profile_id)
+            if (legacyLeader && !ministryLeaders.find(ml => ml.id === legacyLeader.id)) {
+                ministryLeaders.push(legacyLeader)
+            }
+        }
+        return {
+            ...m,
+            leaders: ministryLeaders
+        }
+    })
+
+    return ministriesWithLeaders
 }
 
 export async function fetchLeadersForMinistry() {
