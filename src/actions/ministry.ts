@@ -49,6 +49,7 @@ export async function createMinistry(name: string, description?: string, leaderI
     if (error) return { error: 'Falha ao criar ministério: ' + error.message }
     
     revalidatePath('/leader')
+    revalidatePath('/leader/settings')
     return { success: true, ministry: data }
 }
 
@@ -67,6 +68,7 @@ export async function updateMinistry(id: string, name: string, description?: str
     if (error) return { error: 'Falha ao atualizar ministério: ' + error.message }
     
     revalidatePath('/leader')
+    revalidatePath('/leader/settings')
     return { success: true }
 }
 
@@ -81,6 +83,7 @@ export async function deleteMinistry(id: string) {
     if (error) return { error: 'Falha ao excluir ministério: ' + error.message }
     
     revalidatePath('/leader')
+    revalidatePath('/leader/settings')
     return { success: true }
 }
 
@@ -121,6 +124,26 @@ export async function createServiceTime(dayOfWeek: string, time: string, name?: 
     if (error) return { error: 'Falha ao criar horário: ' + error.message }
     
     revalidatePath('/leader')
+    revalidatePath('/leader/settings')
+    return { success: true }
+}
+
+export async function updateServiceTime(id: string, dayOfWeek: string, time: string, name?: string) {
+    const supabaseAdmin = createAdminClient()
+    
+    const { error } = await supabaseAdmin
+        .from('service_times')
+        .update({
+            day_of_week: dayOfWeek,
+            time,
+            name: name || null
+        })
+        .eq('id', id)
+    
+    if (error) return { error: 'Falha ao atualizar horário: ' + error.message }
+    
+    revalidatePath('/leader')
+    revalidatePath('/leader/settings')
     return { success: true }
 }
 
@@ -135,6 +158,7 @@ export async function deleteServiceTime(id: string) {
     if (error) return { error: 'Falha ao excluir horário: ' + error.message }
     
     revalidatePath('/leader')
+    revalidatePath('/leader/settings')
     return { success: true }
 }
 
@@ -152,7 +176,7 @@ export async function fetchAllVolunteers() {
             role,
             ministry_ids
         `)
-        .eq('role', 'volunteer')
+        .in('role', ['volunteer', 'leader'])
         .order('name')
     
     return data || []
