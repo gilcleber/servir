@@ -23,7 +23,7 @@ export async function createVolunteer(
 
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: userEmail,
-        password: pin, // Using PIN as temporary password for initial login if needed
+        password: pin + pin, // Using PIN+PIN to satisfy 6-char minimum
         email_confirm: true,
         user_metadata: { name, role }
     })
@@ -114,10 +114,10 @@ export async function resetVolunteerPin(profileId: string) {
 
     // Also update Auth password so they can login with it? 
     // Wait, the system uses PIN for volunteer login, but leader login uses password.
-    // If we set password = PIN, it helps if they ever try to login as leader (if promoted).
+    // Update Auth password with 6+ chars
     const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
         profileId,
-        { password: newPin }
+        { password: newPin + newPin }
     )
 
     if (authError) return { error: 'Falha ao atualizar senha: ' + authError.message }

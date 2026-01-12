@@ -36,10 +36,10 @@ export async function loginVolunteer(pin: string) {
     // 4. Create Session using standard Client (to set cookies)
     const supabase = await createClient()
 
-    // Try signing in with Email + PIN (assuming PIN is the password)
+    // Try signing in with Email + PIN (using doubled PIN for length requirements)
     const { error: signInError } = await supabase.auth.signInWithPassword({
         email: profile.email,
-        password: pin // Password MUST match PIN.
+        password: pin + pin // Password is stored as PIN+PIN to satisfy 6-char limit
     })
 
     if (signInError) {
