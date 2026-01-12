@@ -4,20 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
-export async function fetchAllMinistries() {
-    const supabase = await createClient()
-    const { data } = await supabase
-        .from('ministries')
-        .select(`
-            id, 
-            name, 
-            description,
-            leader_profile_id,
-            leader:profiles!leader_profile_id(id, name, avatar_url)
-        `)
-        .order('name')
-    return data || []
-}
+// --- MINISTRY ACTIONS ---
 
 export async function createMinistry(name: string, description?: string, leaderId?: string) {
     const supabase = await createClient()
@@ -31,11 +18,10 @@ export async function createMinistry(name: string, description?: string, leaderI
         .eq('id', user.id)
         .single()
 
-    if (!profile?.church_id) return { error: 'Perfil sem igreja.' }
+    if (!profile?.church_id) return { error: 'Igreja não identificada.' }
 
     const supabaseAdmin = createAdminClient()
-
-    const { data, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
         .from('ministries')
         .insert({
             name,
@@ -43,19 +29,16 @@ export async function createMinistry(name: string, description?: string, leaderI
             leader_profile_id: leaderId || null,
             church_id: profile.church_id
         })
-        .select()
-        .single()
 
     if (error) return { error: 'Falha ao criar ministério: ' + error.message }
 
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
-    return { success: true, ministry: data }
+    return { success: true }
 }
 
 export async function updateMinistry(id: string, name: string, description?: string, leaderId?: string) {
     const supabaseAdmin = createAdminClient()
-
     const { error } = await supabaseAdmin
         .from('ministries')
         .update({
@@ -74,7 +57,6 @@ export async function updateMinistry(id: string, name: string, description?: str
 
 export async function deleteMinistry(id: string) {
     const supabaseAdmin = createAdminClient()
-
     const { error } = await supabaseAdmin
         .from('ministries')
         .delete()
@@ -87,38 +69,96 @@ export async function deleteMinistry(id: string) {
     return { success: true }
 }
 
-// Service Times
-export async function fetchAllServiceTimes() {
+export async function fetchAllMinistries() {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+    if (!profile?.church_id) return []
+
     const { data } = await supabase
-        .from('service_times')
-        .select('*')
-        .order('day_of_week')
+        .from('ministries')
+        .select(`
+            *,
+            leader:leader_profile_id(name, email)
+        `)
+        .eq('church_id', profile.church_id)
+        .order('name')
+
     return data || []
 }
 
-export async function createServiceTime(dayOfWeek: string, time: string, name?: string) {
+export async function fetchLeadersForMinistry() {
+    const supabase = await createClient()
+    // Need church_id
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+
+    if (!profile?.church_id) return []
+
+    // Fetch confirmed leaders
+    const { data } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .eq('church_id', profile.church_id)
+        .eq('role', 'leader')
+        .order('name')
+
+    return data || []
+}
+
+export async function fetchAllVolunteers() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+
+    if (!profile?.church_id) return []
+
+    const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('church_id', profile.church_id)
+        .order('name')
+
+    return data || []
+}
+
+
+// --- SERVICE TIME ACTIONS ---
+
+export async function fetchAllServiceTimes() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+    if (!profile?.church_id) return []
+
+    const { data } = await supabase
+        .from('service_times')
+        .select('*')
+        .eq('church_id', profile.church_id)
+        .order('day_of_week') // Simplistic ordering
+
+    return data || []
+}
+
+export async function createServiceTime(day: string, time: string, name?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Não autenticado.' }
-
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('church_id')
-        .eq('id', user.id)
-        .single()
-
-    if (!profile?.church_id) return { error: 'Perfil sem igreja.' }
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
 
     const supabaseAdmin = createAdminClient()
-
     const { error } = await supabaseAdmin
         .from('service_times')
         .insert({
-            day_of_week: dayOfWeek,
+            church_id: profile.church_id,
+            day_of_week: day,
             time,
-            name,
-            church_id: profile.church_id
+            name
         })
 
     if (error) return { error: 'Falha ao criar horário: ' + error.message }
@@ -128,30 +168,19 @@ export async function createServiceTime(dayOfWeek: string, time: string, name?: 
     return { success: true }
 }
 
-export async function updateServiceTime(id: string, dayOfWeek: string, time: string, name?: string) {
+export async function updateServiceTime(id: string, day: string, time: string, name?: string) {
     const supabaseAdmin = createAdminClient()
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 6698547 (feat: integrate lovable ui improvements, admin actions, and backend logic)
     const { error } = await supabaseAdmin
         .from('service_times')
         .update({
-            day_of_week: dayOfWeek,
+            day_of_week: day,
             time,
-            name: name || null
+            name
         })
         .eq('id', id)
-<<<<<<< HEAD
-    
-    if (error) return { error: 'Falha ao atualizar horário: ' + error.message }
-    
-=======
 
     if (error) return { error: 'Falha ao atualizar horário: ' + error.message }
 
->>>>>>> 6698547 (feat: integrate lovable ui improvements, admin actions, and backend logic)
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
@@ -159,7 +188,6 @@ export async function updateServiceTime(id: string, dayOfWeek: string, time: str
 
 export async function deleteServiceTime(id: string) {
     const supabaseAdmin = createAdminClient()
-
     const { error } = await supabaseAdmin
         .from('service_times')
         .delete()
@@ -170,34 +198,4 @@ export async function deleteServiceTime(id: string) {
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
-}
-
-// Volunteers Management
-export async function fetchAllVolunteers() {
-    const supabase = await createClient()
-    const { data } = await supabase
-        .from('profiles')
-        .select(`
-            id,
-            name,
-            email,
-            phone,
-            avatar_url,
-            role,
-            ministry_ids
-        `)
-        .in('role', ['volunteer', 'leader'])
-        .order('name')
-
-    return data || []
-}
-
-export async function fetchLeadersForMinistry() {
-    const supabase = await createClient()
-    const { data } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url')
-        .in('role', ['leader', 'admin', 'super_admin'])
-        .order('name')
-    return data || []
 }
