@@ -43,14 +43,15 @@ export default function Home() {
                 Começar Gratuitamente
               </Button>
             </Link>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="h-12 px-8 text-base bg-white"
-              onClick={() => window.open('/login/leader', '_blank')}
-            >
-              Ver Demonstração
-            </Button>
+            <Link href="/login/leader" target="_blank">
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-8 text-base bg-white"
+              >
+                Ver Demonstração
+              </Button>
+            </Link>
           </div>
 
           <div className="pt-8 flex items-center gap-3">

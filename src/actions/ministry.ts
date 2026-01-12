@@ -23,18 +23,18 @@ export async function createMinistry(name: string, description?: string, leaderI
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Não autenticado.' }
-    
+
     // Get church_id from profile
     const { data: profile } = await supabase
         .from('profiles')
         .select('church_id')
         .eq('id', user.id)
         .single()
-    
+
     if (!profile?.church_id) return { error: 'Perfil sem igreja.' }
-    
+
     const supabaseAdmin = createAdminClient()
-    
+
     const { data, error } = await supabaseAdmin
         .from('ministries')
         .insert({
@@ -45,9 +45,9 @@ export async function createMinistry(name: string, description?: string, leaderI
         })
         .select()
         .single()
-    
+
     if (error) return { error: 'Falha ao criar ministério: ' + error.message }
-    
+
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true, ministry: data }
@@ -55,7 +55,7 @@ export async function createMinistry(name: string, description?: string, leaderI
 
 export async function updateMinistry(id: string, name: string, description?: string, leaderId?: string) {
     const supabaseAdmin = createAdminClient()
-    
+
     const { error } = await supabaseAdmin
         .from('ministries')
         .update({
@@ -64,9 +64,9 @@ export async function updateMinistry(id: string, name: string, description?: str
             leader_profile_id: leaderId || null
         })
         .eq('id', id)
-    
+
     if (error) return { error: 'Falha ao atualizar ministério: ' + error.message }
-    
+
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
@@ -74,14 +74,14 @@ export async function updateMinistry(id: string, name: string, description?: str
 
 export async function deleteMinistry(id: string) {
     const supabaseAdmin = createAdminClient()
-    
+
     const { error } = await supabaseAdmin
         .from('ministries')
         .delete()
         .eq('id', id)
-    
+
     if (error) return { error: 'Falha ao excluir ministério: ' + error.message }
-    
+
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
@@ -101,17 +101,17 @@ export async function createServiceTime(dayOfWeek: string, time: string, name?: 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Não autenticado.' }
-    
+
     const { data: profile } = await supabase
         .from('profiles')
         .select('church_id')
         .eq('id', user.id)
         .single()
-    
+
     if (!profile?.church_id) return { error: 'Perfil sem igreja.' }
-    
+
     const supabaseAdmin = createAdminClient()
-    
+
     const { error } = await supabaseAdmin
         .from('service_times')
         .insert({
@@ -120,9 +120,9 @@ export async function createServiceTime(dayOfWeek: string, time: string, name?: 
             name,
             church_id: profile.church_id
         })
-    
+
     if (error) return { error: 'Falha ao criar horário: ' + error.message }
-    
+
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
@@ -130,7 +130,11 @@ export async function createServiceTime(dayOfWeek: string, time: string, name?: 
 
 export async function updateServiceTime(id: string, dayOfWeek: string, time: string, name?: string) {
     const supabaseAdmin = createAdminClient()
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 6698547 (feat: integrate lovable ui improvements, admin actions, and backend logic)
     const { error } = await supabaseAdmin
         .from('service_times')
         .update({
@@ -139,9 +143,15 @@ export async function updateServiceTime(id: string, dayOfWeek: string, time: str
             name: name || null
         })
         .eq('id', id)
+<<<<<<< HEAD
     
     if (error) return { error: 'Falha ao atualizar horário: ' + error.message }
     
+=======
+
+    if (error) return { error: 'Falha ao atualizar horário: ' + error.message }
+
+>>>>>>> 6698547 (feat: integrate lovable ui improvements, admin actions, and backend logic)
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
@@ -149,14 +159,14 @@ export async function updateServiceTime(id: string, dayOfWeek: string, time: str
 
 export async function deleteServiceTime(id: string) {
     const supabaseAdmin = createAdminClient()
-    
+
     const { error } = await supabaseAdmin
         .from('service_times')
         .delete()
         .eq('id', id)
-    
+
     if (error) return { error: 'Falha ao excluir horário: ' + error.message }
-    
+
     revalidatePath('/leader')
     revalidatePath('/leader/settings')
     return { success: true }
@@ -178,7 +188,7 @@ export async function fetchAllVolunteers() {
         `)
         .in('role', ['volunteer', 'leader'])
         .order('name')
-    
+
     return data || []
 }
 

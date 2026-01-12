@@ -32,21 +32,21 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
     const [showMinistryModal, setShowMinistryModal] = useState(false)
     const [showServiceTimeModal, setShowServiceTimeModal] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    
+
     // Edit mode
     const [editingMinistry, setEditingMinistry] = useState<any>(null)
     const [editingServiceTime, setEditingServiceTime] = useState<any>(null)
-    
+
     // Ministry form
     const [ministryName, setMinistryName] = useState("")
     const [ministryDesc, setMinistryDesc] = useState("")
     const [ministryLeader, setMinistryLeader] = useState("")
-    
+
     // Service time form
     const [stDay, setStDay] = useState("Domingo")
     const [stTime, setStTime] = useState("09:00")
     const [stName, setStName] = useState("")
-    
+
     const openMinistryModal = (ministry?: any) => {
         if (ministry) {
             setEditingMinistry(ministry)
@@ -61,7 +61,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
         }
         setShowMinistryModal(true)
     }
-    
+
     const openServiceTimeModal = (st?: any) => {
         if (st) {
             setEditingServiceTime(st)
@@ -76,21 +76,21 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
         }
         setShowServiceTimeModal(true)
     }
-    
+
     const handleSaveMinistry = async () => {
         if (!ministryName.trim()) {
             toast.error("Nome é obrigatório")
             return
         }
         setIsLoading(true)
-        
+
         let result
         if (editingMinistry) {
             result = await updateMinistry(editingMinistry.id, ministryName, ministryDesc, ministryLeader || undefined)
         } else {
             result = await createMinistry(ministryName, ministryDesc, ministryLeader || undefined)
         }
-        
+
         if (result.error) {
             toast.error(result.error)
         } else {
@@ -99,7 +99,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
         }
         setIsLoading(false)
     }
-    
+
     const handleDeleteMinistry = async (id: string) => {
         if (!confirm("Tem certeza que deseja excluir este ministério?")) return
         const result = await deleteMinistry(id)
@@ -109,17 +109,17 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
             toast.success("Ministério excluído!")
         }
     }
-    
+
     const handleSaveServiceTime = async () => {
         setIsLoading(true)
-        
+
         let result
         if (editingServiceTime) {
             result = await updateServiceTime(editingServiceTime.id, stDay, stTime, stName || undefined)
         } else {
             result = await createServiceTime(stDay, stTime, stName || undefined)
         }
-        
+
         if (result.error) {
             toast.error(result.error)
         } else {
@@ -128,7 +128,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
         }
         setIsLoading(false)
     }
-    
+
     const handleDeleteServiceTime = async (id: string) => {
         if (!confirm("Tem certeza que deseja excluir este horário?")) return
         const result = await deleteServiceTime(id)
@@ -138,7 +138,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
             toast.success("Horário excluído!")
         }
     }
-    
+
     return (
         <Tabs defaultValue="ministries" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 h-12">
@@ -149,7 +149,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                     <Clock className="w-4 h-4 mr-2" /> Horários de Culto
                 </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="ministries" className="space-y-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-lg font-semibold">Ministérios ({ministries.length})</h2>
@@ -157,7 +157,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                         <Plus className="w-4 h-4 mr-2" /> Novo Ministério
                     </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {ministries.map((m) => (
                         <Card key={m.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openMinistryModal(m)}>
@@ -202,7 +202,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                             </CardContent>
                         </Card>
                     ))}
-                    
+
                     {ministries.length === 0 && (
                         <p className="text-muted-foreground col-span-2 text-center py-8">
                             Nenhum ministério cadastrado. Clique em "Novo Ministério" para começar.
@@ -210,7 +210,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                     )}
                 </div>
             </TabsContent>
-            
+
             <TabsContent value="service-times" className="space-y-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-lg font-semibold">Horários de Culto ({serviceTimes.length})</h2>
@@ -218,7 +218,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                         <Plus className="w-4 h-4 mr-2" /> Novo Horário
                     </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {serviceTimes.map((st) => (
                         <Card key={st.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openServiceTimeModal(st)}>
@@ -251,7 +251,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                             </CardContent>
                         </Card>
                     ))}
-                    
+
                     {serviceTimes.length === 0 && (
                         <p className="text-muted-foreground col-span-3 text-center py-8">
                             Nenhum horário cadastrado. Clique em "Novo Horário" para começar.
@@ -259,7 +259,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                     )}
                 </div>
             </TabsContent>
-            
+
             {/* Ministry Modal */}
             <Dialog open={showMinistryModal} onOpenChange={setShowMinistryModal}>
                 <DialogContent>
@@ -309,7 +309,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            
+
             {/* Service Time Modal */}
             <Dialog open={showServiceTimeModal} onOpenChange={setShowServiceTimeModal}>
                 <DialogContent>

@@ -45,38 +45,38 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
     const [searchTerm, setSearchTerm] = useState("")
     const [createdPin, setCreatedPin] = useState("")
     const [createdName, setCreatedName] = useState("")
-    
+
     // Edit mode
     const [editingVolunteer, setEditingVolunteer] = useState<any>(null)
     const [volunteerToDelete, setVolunteerToDelete] = useState<any>(null)
-    
+
     // Form
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
     const [role, setRole] = useState<'volunteer' | 'leader'>('volunteer')
     const [selectedMinistries, setSelectedMinistries] = useState<string[]>([])
-    
-    const filteredVolunteers = volunteers.filter(v => 
+
+    const filteredVolunteers = volunteers.filter(v =>
         v.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         v.email?.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    
+
     const getMinistryNames = (ministryIds: string[] | null) => {
         if (!ministryIds || ministryIds.length === 0) return []
         return ministries
             .filter(m => ministryIds.includes(m.id))
             .map(m => m.name)
     }
-    
+
     const handleToggleMinistry = (ministryId: string) => {
-        setSelectedMinistries(prev => 
-            prev.includes(ministryId) 
+        setSelectedMinistries(prev =>
+            prev.includes(ministryId)
                 ? prev.filter(id => id !== ministryId)
                 : [...prev, ministryId]
         )
     }
-    
+
     const openModal = (volunteer?: any) => {
         if (volunteer) {
             setEditingVolunteer(volunteer)
@@ -95,7 +95,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
         }
         setShowModal(true)
     }
-    
+
     const handleSave = async () => {
         if (!name.trim()) {
             toast.error("Nome é obrigatório")
@@ -105,9 +105,9 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
             toast.error("Erro: Igreja não identificada")
             return
         }
-        
+
         setIsLoading(true)
-        
+
         if (editingVolunteer) {
             // Update
             const result = await updateVolunteer(
@@ -138,7 +138,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
         }
         setIsLoading(false)
     }
-    
+
     const handleResetPin = async (volunteer: any) => {
         setIsLoading(true)
         const result = await resetVolunteerPin(volunteer.id)
@@ -151,7 +151,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
         }
         setIsLoading(false)
     }
-    
+
     const handleDelete = async () => {
         if (!volunteerToDelete) return
         setIsLoading(true)
@@ -165,12 +165,12 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
         setVolunteerToDelete(null)
         setIsLoading(false)
     }
-    
+
     const copyPin = () => {
         navigator.clipboard.writeText(createdPin)
         toast.success("PIN copiado!")
     }
-    
+
     return (
         <div className="space-y-6">
             {/* Search & Add */}
@@ -188,12 +188,12 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                     <Plus className="w-4 h-4 mr-2" /> Novo Membro
                 </Button>
             </div>
-            
+
             {/* Volunteers Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredVolunteers.map((v) => (
-                    <Card 
-                        key={v.id} 
+                    <Card
+                        key={v.id}
                         className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                         onClick={() => openModal(v)}
                     >
@@ -211,21 +211,21 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                             <Badge variant="default" className="text-[10px] py-0">Líder</Badge>
                                         )}
                                     </div>
-                                    
+
                                     {v.email && (
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                             <Mail className="w-3 h-3" />
                                             <span className="truncate">{v.email}</span>
                                         </div>
                                     )}
-                                    
+
                                     {v.phone && (
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                             <Phone className="w-3 h-3" />
                                             <span>{v.phone}</span>
                                         </div>
                                     )}
-                                    
+
                                     <div className="flex flex-wrap gap-1 mt-2">
                                         {getMinistryNames(v.ministry_ids).map((name, i) => (
                                             <Badge key={i} variant="secondary" className="text-[10px] py-0">
@@ -238,21 +238,21 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                         </CardContent>
                     </Card>
                 ))}
-                
+
                 {filteredVolunteers.length === 0 && (
                     <p className="text-muted-foreground col-span-3 text-center py-12">
                         {searchTerm ? "Nenhum voluntário encontrado." : "Nenhum voluntário cadastrado ainda."}
                     </p>
                 )}
             </div>
-            
+
             {/* Create/Edit Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>{editingVolunteer ? 'Editar Membro' : 'Novo Membro'}</DialogTitle>
                         <DialogDescription>
-                            {editingVolunteer 
+                            {editingVolunteer
                                 ? 'Atualize as informações do membro da equipe.'
                                 : 'Um PIN de 4 dígitos será gerado automaticamente.'}
                         </DialogDescription>
@@ -283,7 +283,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                 placeholder="(11) 99999-9999"
                             />
                         </div>
-                        
+
                         <div className="space-y-2">
                             <Label>Função na Igreja *</Label>
                             <RadioGroup value={role} onValueChange={(v) => setRole(v as any)} className="flex gap-4">
@@ -300,7 +300,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                 Líderes podem gerenciar escalas dos ministérios atribuídos a eles.
                             </p>
                         </div>
-                        
+
                         <div className="space-y-2">
                             <Label>Ministérios</Label>
                             <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border rounded-md">
@@ -323,11 +323,11 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                 )}
                             </div>
                         </div>
-                        
+
                         {editingVolunteer && (
                             <div className="flex gap-2 pt-2 border-t">
-                                <Button 
-                                    variant="outline" 
+                                <Button
+                                    variant="outline"
                                     size="sm"
                                     className="flex-1"
                                     onClick={() => handleResetPin(editingVolunteer)}
@@ -336,8 +336,8 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                     <KeyRound className="w-4 h-4 mr-2" />
                                     Gerar Novo PIN
                                 </Button>
-                                <Button 
-                                    variant="destructive" 
+                                <Button
+                                    variant="destructive"
                                     size="sm"
                                     onClick={() => {
                                         setVolunteerToDelete(editingVolunteer)
@@ -358,7 +358,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            
+
             {/* PIN Success Modal */}
             <Dialog open={showPinModal} onOpenChange={setShowPinModal}>
                 <DialogContent className="max-w-sm text-center">
@@ -390,7 +390,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            
+
             {/* Delete Confirmation */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>

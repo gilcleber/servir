@@ -1,29 +1,36 @@
 import { DashboardHeader } from "@/components/layout/dashboard-header"
-import { createClient } from "@/lib/supabase/server"
+import { getUser } from "@/actions/auth"
+import { redirect } from "next/navigation"
+import { fetchAllMinistries, fetchAllVolunteers } from "@/actions/ministry"
 import { VolunteersClient } from "./volunteers-client"
-import { fetchAllVolunteers, fetchAllMinistries } from "@/actions/ministry"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function VolunteersPage() {
+    const user = await getUser()
+    if (!user) redirect('/login/leader')
+
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    const { data: profile } = await supabase.from('profiles').select('name, church_id').eq('id', user?.id).single()
-    
+    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+
     const volunteers = await fetchAllVolunteers()
     const ministries = await fetchAllMinistries()
-    
+
     return (
-        <div className="min-h-screen bg-[#FDFBF7]">
+        <div className="min-h-screen bg-gray-50 pb-20">
             <DashboardHeader
-                userEmail={user?.email}
-                userName={profile?.name || 'Líder'}
-                role="leader"
+                userEmail={user.email}
+                userName={user.user_metadata?.name}
+                role={user.user_metadata?.role}
             />
-            
-            <main className="p-4 md:p-6 max-w-5xl mx-auto">
-                <h1 className="text-2xl font-bold mb-6">Voluntários</h1>
-                
-                <VolunteersClient 
-                    volunteers={volunteers} 
+
+            <main className="max-w-6xl mx-auto px-4 py-8">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold">Voluntários e Líderes</h1>
+                    <p className="text-muted-foreground">Gerencie todos os membros da sua equipe.</p>
+                </div>
+
+                <VolunteersClient
+                    volunteers={volunteers}
                     ministries={ministries}
                     churchId={profile?.church_id}
                 />

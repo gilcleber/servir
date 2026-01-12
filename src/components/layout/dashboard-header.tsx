@@ -24,12 +24,12 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ userEmail, userName, role }: DashboardHeaderProps) {
     const initials = userName?.substring(0, 2).toUpperCase() || "US"
     const pathname = usePathname()
-    
+
     // Determine if we're on a sub-page (not main dashboard)
     const isLeaderSubPage = pathname?.startsWith('/leader/') && pathname !== '/leader'
     const isVolunteerSubPage = pathname?.startsWith('/volunteer/') && pathname !== '/volunteer'
     const isSubPage = isLeaderSubPage || isVolunteerSubPage
-    
+
     // Get the base path for back button
     const basePath = role === 'volunteer' ? '/volunteer' : '/leader'
 
@@ -44,7 +44,7 @@ export function DashboardHeader({ userEmail, userName, role }: DashboardHeaderPr
                         </Button>
                     </Link>
                 ) : null}
-                
+
                 <Link href={basePath} className="flex items-center gap-2">
                     <div className="bg-primary p-1.5 rounded-lg">
                         <Home className="w-4 h-4 text-primary-foreground" />
