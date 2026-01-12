@@ -109,7 +109,7 @@ export default function LeaderLoginPage() {
                                 <Link href="/repair" className="text-xs text-red-500 font-bold hover:underline">
                                     Problemas de Acesso?
                                 </Link>
-                                <a href="#" className="text-xs text-primary font-medium hover:underline">Esqueceu a senha?</a>
+                                <button type="button" onClick={() => toast.info("Contate o suporte para redefinir sua senha.")} className="text-xs text-primary font-medium hover:underline bg-transparent border-0 p-0 cursor-pointer">Esqueceu a senha?</button>
                             </div>
 
                             <Button type="submit" className="w-full h-12 text-lg" disabled={isLoading}>

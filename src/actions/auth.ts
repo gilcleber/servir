@@ -19,7 +19,7 @@ export async function loginVolunteer(pin: string) {
     const { data: profile, error } = await supabaseAdmin
         .from('profiles')
         .select('*')
-        .eq('role', 'volunteer')
+        .in('role', ['volunteer', 'leader'])
         .eq('pin', pinHash)
         .single() // Expect unique PIN hash
 

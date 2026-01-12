@@ -28,7 +28,10 @@ interface SettingsClientProps {
 
 const DAYS_OF_WEEK = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
-export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsClientProps) {
+export function SettingsClient({ ministries: _ministries, serviceTimes: _serviceTimes, leaders: _leaders }: SettingsClientProps) {
+    const ministries = _ministries || []
+    const serviceTimes = _serviceTimes || []
+    const leaders = _leaders || []
     const [showMinistryModal, setShowMinistryModal] = useState(false)
     const [showServiceTimeModal, setShowServiceTimeModal] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -285,12 +288,12 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                         </div>
                         <div className="space-y-2">
                             <Label>Líder Responsável</Label>
-                            <Select value={ministryLeader} onValueChange={setMinistryLeader}>
+                            <Select value={ministryLeader || "none"} onValueChange={(v) => setMinistryLeader(v === "none" ? "" : v)}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione um líder" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Nenhum</SelectItem>
+                                    <SelectItem value="none">Nenhum</SelectItem>
                                     {leaders.map((l) => (
                                         <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                                     ))}

@@ -71,7 +71,7 @@ export default function VolunteerLoginPage() {
                         </Button>
 
                         <p className="text-sm text-muted-foreground">
-                            Não tem um PIN? <a href="#" className="text-primary font-medium hover:underline">Fale com seu líder</a>
+                            Não tem um PIN? <button onClick={() => toast.info("Peça ao seu líder para resetar seu PIN.")} className="text-primary font-medium hover:underline bg-transparent border-0 p-0 cursor-pointer">Fale com seu líder</button>
                         </p>
                     </CardContent>
                 </Card>
