@@ -57,14 +57,17 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
     const [role, setRole] = useState<'volunteer' | 'leader'>('volunteer')
     const [selectedMinistries, setSelectedMinistries] = useState<string[]>([])
 
-    const filteredVolunteers = volunteers.filter(v =>
+    const safeVolunteers = volunteers || []
+    const safeMinistries = ministries || []
+
+    const filteredVolunteers = safeVolunteers.filter(v =>
         v.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         v.email?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     const getMinistryNames = (ministryIds: string[] | null) => {
         if (!ministryIds || ministryIds.length === 0) return []
-        return ministries
+        return safeMinistries
             .filter(m => ministryIds.includes(m.id))
             .map(m => m.name)
     }
@@ -304,7 +307,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                         <div className="space-y-2">
                             <Label>Ministérios</Label>
                             <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border rounded-md">
-                                {ministries.map((m) => (
+                                {safeMinistries.map((m) => (
                                     <div key={m.id} className="flex items-center gap-2">
                                         <Checkbox
                                             id={m.id}
@@ -316,7 +319,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                         </label>
                                     </div>
                                 ))}
-                                {ministries.length === 0 && (
+                                {safeMinistries.length === 0 && (
                                     <p className="text-sm text-muted-foreground col-span-2">
                                         Cadastre ministérios primeiro nas Configurações.
                                     </p>

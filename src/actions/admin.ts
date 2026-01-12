@@ -102,6 +102,7 @@ export async function resetVolunteerPin(profileId: string) {
 
     // Generate new PIN
     const newPin = Math.floor(1000 + Math.random() * 9000).toString()
+    console.log(`[Admin] Resetting PIN for ${profileId} to ${newPin} (Auth Password: ${newPin + newPin})`)
     const pinHash = createHash('sha256').update(newPin).digest('hex')
 
     // Update profile
