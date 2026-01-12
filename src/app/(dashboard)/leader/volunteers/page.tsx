@@ -10,7 +10,7 @@ export default async function VolunteersPage() {
     if (!user) redirect('/login/leader')
 
     const supabase = await createClient()
-    const { data: profile } = await supabase.from('profiles').select('church_id').eq('id', user.id).single()
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
     const volunteers = await fetchAllVolunteers()
     const ministries = await fetchAllMinistries()
@@ -33,6 +33,7 @@ export default async function VolunteersPage() {
                     volunteers={volunteers}
                     ministries={ministries}
                     churchId={profile?.church_id}
+                    currentUser={profile}
                 />
             </main>
         </div>

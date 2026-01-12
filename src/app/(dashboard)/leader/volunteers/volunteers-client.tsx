@@ -35,9 +35,10 @@ interface VolunteersClientProps {
     volunteers: any[]
     ministries: any[]
     churchId?: string
+    currentUser?: any
 }
 
-export function VolunteersClient({ volunteers, ministries, churchId }: VolunteersClientProps) {
+export function VolunteersClient({ volunteers, ministries, churchId, currentUser }: VolunteersClientProps) {
     const [showModal, setShowModal] = useState(false)
     const [showPinModal, setShowPinModal] = useState(false)
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -60,10 +61,30 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
     const safeVolunteers = volunteers || []
     const safeMinistries = ministries || []
 
-    const filteredVolunteers = safeVolunteers.filter(v =>
-        v.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const isPastor = currentUser?.email === 'gilcleberlocutor@gmail.com'
+
+    const filteredVolunteers = safeVolunteers.filter(v => {
+        const matchesSearch = v.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            v.email?.toLowerCase().includes(searchTerm.toLowerCase())
+
+        if (!matchesSearch) return false
+
+        // If Pastor or Admin, show everyone
+        if (isPastor || currentUser?.role === 'admin' || currentUser?.role === 'super_admin') {
+            return true
+        }
+
+        // If Leader, show only volunteers in their ministries (or themselves)
+        if (currentUser?.role === 'leader') {
+            const myMinistries = currentUser.ministry_ids || []
+            const volunteerMinistries = v.ministry_ids || []
+            // Check intersection
+            const shareMinistry = volunteerMinistries.some((id: string) => myMinistries.includes(id))
+            return shareMinistry || v.id === currentUser.id
+        }
+
+        return false
+    })
 
     const getMinistryNames = (ministryIds: string[] | null) => {
         if (!ministryIds || ministryIds.length === 0) return []
