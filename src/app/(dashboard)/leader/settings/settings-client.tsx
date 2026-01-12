@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Trash2, Church, Clock, Users } from "lucide-react"
+import { Plus, Trash2, Church, Clock, Pencil } from "lucide-react"
 import { toast } from "sonner"
-import { createMinistry, deleteMinistry, createServiceTime, deleteServiceTime } from "@/actions/ministry"
+import { createMinistry, deleteMinistry, updateMinistry, createServiceTime, deleteServiceTime, updateServiceTime } from "@/actions/ministry"
 import {
     Dialog,
     DialogContent,
@@ -33,6 +33,10 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
     const [showServiceTimeModal, setShowServiceTimeModal] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     
+    // Edit mode
+    const [editingMinistry, setEditingMinistry] = useState<any>(null)
+    const [editingServiceTime, setEditingServiceTime] = useState<any>(null)
+    
     // Ministry form
     const [ministryName, setMinistryName] = useState("")
     const [ministryDesc, setMinistryDesc] = useState("")
@@ -43,21 +47,55 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
     const [stTime, setStTime] = useState("09:00")
     const [stName, setStName] = useState("")
     
-    const handleCreateMinistry = async () => {
+    const openMinistryModal = (ministry?: any) => {
+        if (ministry) {
+            setEditingMinistry(ministry)
+            setMinistryName(ministry.name)
+            setMinistryDesc(ministry.description || "")
+            setMinistryLeader(ministry.leader_profile_id || "")
+        } else {
+            setEditingMinistry(null)
+            setMinistryName("")
+            setMinistryDesc("")
+            setMinistryLeader("")
+        }
+        setShowMinistryModal(true)
+    }
+    
+    const openServiceTimeModal = (st?: any) => {
+        if (st) {
+            setEditingServiceTime(st)
+            setStDay(st.day_of_week)
+            setStTime(st.time?.substring(0, 5) || "09:00")
+            setStName(st.name || "")
+        } else {
+            setEditingServiceTime(null)
+            setStDay("Domingo")
+            setStTime("09:00")
+            setStName("")
+        }
+        setShowServiceTimeModal(true)
+    }
+    
+    const handleSaveMinistry = async () => {
         if (!ministryName.trim()) {
             toast.error("Nome é obrigatório")
             return
         }
         setIsLoading(true)
-        const result = await createMinistry(ministryName, ministryDesc, ministryLeader || undefined)
+        
+        let result
+        if (editingMinistry) {
+            result = await updateMinistry(editingMinistry.id, ministryName, ministryDesc, ministryLeader || undefined)
+        } else {
+            result = await createMinistry(ministryName, ministryDesc, ministryLeader || undefined)
+        }
+        
         if (result.error) {
             toast.error(result.error)
         } else {
-            toast.success("Ministério criado!")
+            toast.success(editingMinistry ? "Ministério atualizado!" : "Ministério criado!")
             setShowMinistryModal(false)
-            setMinistryName("")
-            setMinistryDesc("")
-            setMinistryLeader("")
         }
         setIsLoading(false)
     }
@@ -72,16 +110,21 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
         }
     }
     
-    const handleCreateServiceTime = async () => {
+    const handleSaveServiceTime = async () => {
         setIsLoading(true)
-        const result = await createServiceTime(stDay, stTime, stName || undefined)
+        
+        let result
+        if (editingServiceTime) {
+            result = await updateServiceTime(editingServiceTime.id, stDay, stTime, stName || undefined)
+        } else {
+            result = await createServiceTime(stDay, stTime, stName || undefined)
+        }
+        
         if (result.error) {
             toast.error(result.error)
         } else {
-            toast.success("Horário criado!")
+            toast.success(editingServiceTime ? "Horário atualizado!" : "Horário criado!")
             setShowServiceTimeModal(false)
-            setStTime("09:00")
-            setStName("")
         }
         setIsLoading(false)
     }
@@ -110,25 +153,35 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
             <TabsContent value="ministries" className="space-y-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-lg font-semibold">Ministérios ({ministries.length})</h2>
-                    <Button onClick={() => setShowMinistryModal(true)}>
+                    <Button onClick={() => openMinistryModal()}>
                         <Plus className="w-4 h-4 mr-2" /> Novo Ministério
                     </Button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {ministries.map((m) => (
-                        <Card key={m.id} className="border-0 shadow-sm">
+                        <Card key={m.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openMinistryModal(m)}>
                             <CardHeader className="pb-2">
                                 <div className="flex justify-between items-start">
                                     <CardTitle className="text-lg">{m.name}</CardTitle>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        onClick={() => handleDeleteMinistry(m.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    <div className="flex gap-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-muted-foreground hover:text-foreground"
+                                            onClick={(e) => { e.stopPropagation(); openMinistryModal(m) }}
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteMinistry(m.id) }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -138,10 +191,13 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                                 {m.leader && (
                                     <div className="flex items-center gap-2 text-sm">
                                         <Avatar className="h-6 w-6">
-                                            <AvatarFallback className="text-xs">{m.leader.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                            <AvatarFallback className="text-xs bg-primary/10 text-primary">{m.leader.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
                                         </Avatar>
-                                        <span className="text-muted-foreground">Líder: {m.leader.name}</span>
+                                        <span className="text-muted-foreground">Líder: <strong>{m.leader.name}</strong></span>
                                     </div>
+                                )}
+                                {!m.leader && (
+                                    <p className="text-sm text-yellow-600">⚠️ Sem líder definido</p>
                                 )}
                             </CardContent>
                         </Card>
@@ -158,29 +214,39 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
             <TabsContent value="service-times" className="space-y-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-lg font-semibold">Horários de Culto ({serviceTimes.length})</h2>
-                    <Button onClick={() => setShowServiceTimeModal(true)}>
+                    <Button onClick={() => openServiceTimeModal()}>
                         <Plus className="w-4 h-4 mr-2" /> Novo Horário
                     </Button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {serviceTimes.map((st) => (
-                        <Card key={st.id} className="border-0 shadow-sm">
+                        <Card key={st.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openServiceTimeModal(st)}>
                             <CardContent className="pt-4">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="font-semibold">{st.day_of_week}</p>
-                                        <p className="text-2xl font-bold text-primary">{st.time}</p>
+                                        <p className="text-2xl font-bold text-primary">{st.time?.substring(0, 5)}</p>
                                         {st.name && <p className="text-sm text-muted-foreground">{st.name}</p>}
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        onClick={() => handleDeleteServiceTime(st.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    <div className="flex gap-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-muted-foreground hover:text-foreground"
+                                            onClick={(e) => { e.stopPropagation(); openServiceTimeModal(st) }}
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteServiceTime(st.id) }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -198,7 +264,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
             <Dialog open={showMinistryModal} onOpenChange={setShowMinistryModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Novo Ministério</DialogTitle>
+                        <DialogTitle>{editingMinistry ? 'Editar Ministério' : 'Novo Ministério'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
@@ -224,17 +290,21 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                                     <SelectValue placeholder="Selecione um líder" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="">Nenhum</SelectItem>
                                     {leaders.map((l) => (
                                         <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <p className="text-xs text-muted-foreground">
+                                Apenas usuários com papel de "Líder" aparecem aqui. Cadastre líderes na aba Voluntários.
+                            </p>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowMinistryModal(false)}>Cancelar</Button>
-                        <Button onClick={handleCreateMinistry} disabled={isLoading}>
-                            {isLoading ? "Criando..." : "Criar Ministério"}
+                        <Button onClick={handleSaveMinistry} disabled={isLoading}>
+                            {isLoading ? "Salvando..." : (editingMinistry ? "Salvar" : "Criar")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -244,7 +314,7 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
             <Dialog open={showServiceTimeModal} onOpenChange={setShowServiceTimeModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Novo Horário de Culto</DialogTitle>
+                        <DialogTitle>{editingServiceTime ? 'Editar Horário' : 'Novo Horário de Culto'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
@@ -279,8 +349,8 @@ export function SettingsClient({ ministries, serviceTimes, leaders }: SettingsCl
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowServiceTimeModal(false)}>Cancelar</Button>
-                        <Button onClick={handleCreateServiceTime} disabled={isLoading}>
-                            {isLoading ? "Criando..." : "Criar Horário"}
+                        <Button onClick={handleSaveServiceTime} disabled={isLoading}>
+                            {isLoading ? "Salvando..." : (editingServiceTime ? "Salvar" : "Criar")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

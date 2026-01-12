@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Search, Phone, Mail, Copy } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Plus, Search, Phone, Mail, Copy, KeyRound, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { createVolunteer } from "@/actions/admin"
+import { createVolunteer, updateVolunteer, resetVolunteerPin, deleteVolunteer } from "@/actions/admin"
 import {
     Dialog,
     DialogContent,
@@ -19,6 +20,16 @@ import {
     DialogFooter,
     DialogDescription,
 } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface VolunteersClientProps {
     volunteers: any[]
@@ -29,15 +40,21 @@ interface VolunteersClientProps {
 export function VolunteersClient({ volunteers, ministries, churchId }: VolunteersClientProps) {
     const [showModal, setShowModal] = useState(false)
     const [showPinModal, setShowPinModal] = useState(false)
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     const [createdPin, setCreatedPin] = useState("")
     const [createdName, setCreatedName] = useState("")
     
+    // Edit mode
+    const [editingVolunteer, setEditingVolunteer] = useState<any>(null)
+    const [volunteerToDelete, setVolunteerToDelete] = useState<any>(null)
+    
     // Form
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
+    const [role, setRole] = useState<'volunteer' | 'leader'>('volunteer')
     const [selectedMinistries, setSelectedMinistries] = useState<string[]>([])
     
     const filteredVolunteers = volunteers.filter(v => 
@@ -60,7 +77,26 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
         )
     }
     
-    const handleCreate = async () => {
+    const openModal = (volunteer?: any) => {
+        if (volunteer) {
+            setEditingVolunteer(volunteer)
+            setName(volunteer.name || "")
+            setEmail(volunteer.email || "")
+            setPhone(volunteer.phone || "")
+            setRole(volunteer.role || 'volunteer')
+            setSelectedMinistries(volunteer.ministry_ids || [])
+        } else {
+            setEditingVolunteer(null)
+            setName("")
+            setEmail("")
+            setPhone("")
+            setRole('volunteer')
+            setSelectedMinistries([])
+        }
+        setShowModal(true)
+    }
+    
+    const handleSave = async () => {
         if (!name.trim()) {
             toast.error("Nome é obrigatório")
             return
@@ -71,21 +107,62 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
         }
         
         setIsLoading(true)
-        const result = await createVolunteer(name, email, selectedMinistries, churchId)
         
+        if (editingVolunteer) {
+            // Update
+            const result = await updateVolunteer(
+                editingVolunteer.id,
+                name,
+                email,
+                phone,
+                selectedMinistries,
+                role
+            )
+            if (result.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Voluntário atualizado!")
+                setShowModal(false)
+            }
+        } else {
+            // Create
+            const result = await createVolunteer(name, email, selectedMinistries, churchId, role)
+            if (result.error) {
+                toast.error(result.error)
+            } else if (result.pin) {
+                setCreatedPin(result.pin)
+                setCreatedName(name)
+                setShowModal(false)
+                setShowPinModal(true)
+            }
+        }
+        setIsLoading(false)
+    }
+    
+    const handleResetPin = async (volunteer: any) => {
+        setIsLoading(true)
+        const result = await resetVolunteerPin(volunteer.id)
         if (result.error) {
             toast.error(result.error)
         } else if (result.pin) {
             setCreatedPin(result.pin)
-            setCreatedName(name)
-            setShowModal(false)
+            setCreatedName(volunteer.name)
             setShowPinModal(true)
-            // Reset form
-            setName("")
-            setEmail("")
-            setPhone("")
-            setSelectedMinistries([])
         }
+        setIsLoading(false)
+    }
+    
+    const handleDelete = async () => {
+        if (!volunteerToDelete) return
+        setIsLoading(true)
+        const result = await deleteVolunteer(volunteerToDelete.id)
+        if (result.error) {
+            toast.error(result.error)
+        } else {
+            toast.success("Voluntário excluído!")
+        }
+        setShowDeleteDialog(false)
+        setVolunteerToDelete(null)
         setIsLoading(false)
     }
     
@@ -107,15 +184,19 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <Button onClick={() => setShowModal(true)}>
-                    <Plus className="w-4 h-4 mr-2" /> Novo Voluntário
+                <Button onClick={() => openModal()}>
+                    <Plus className="w-4 h-4 mr-2" /> Novo Membro
                 </Button>
             </div>
             
             {/* Volunteers Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredVolunteers.map((v) => (
-                    <Card key={v.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                    <Card 
+                        key={v.id} 
+                        className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => openModal(v)}
+                    >
                         <CardContent className="pt-4">
                             <div className="flex items-start gap-3">
                                 <Avatar className="h-12 w-12 border-2 border-primary/20">
@@ -124,7 +205,12 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-semibold truncate">{v.name}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold truncate">{v.name}</p>
+                                        {v.role === 'leader' && (
+                                            <Badge variant="default" className="text-[10px] py-0">Líder</Badge>
+                                        )}
+                                    </div>
                                     
                                     {v.email && (
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -160,13 +246,15 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                 )}
             </div>
             
-            {/* Create Modal */}
+            {/* Create/Edit Modal */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Novo Voluntário</DialogTitle>
+                        <DialogTitle>{editingVolunteer ? 'Editar Membro' : 'Novo Membro'}</DialogTitle>
                         <DialogDescription>
-                            Um PIN de 4 dígitos será gerado automaticamente.
+                            {editingVolunteer 
+                                ? 'Atualize as informações do membro da equipe.'
+                                : 'Um PIN de 4 dígitos será gerado automaticamente.'}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -197,6 +285,23 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                         </div>
                         
                         <div className="space-y-2">
+                            <Label>Função na Igreja *</Label>
+                            <RadioGroup value={role} onValueChange={(v) => setRole(v as any)} className="flex gap-4">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="volunteer" id="role-vol" />
+                                    <Label htmlFor="role-vol" className="cursor-pointer font-normal">Voluntário</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="leader" id="role-leader" />
+                                    <Label htmlFor="role-leader" className="cursor-pointer font-normal">Líder de Ministério</Label>
+                                </div>
+                            </RadioGroup>
+                            <p className="text-xs text-muted-foreground">
+                                Líderes podem gerenciar escalas dos ministérios atribuídos a eles.
+                            </p>
+                        </div>
+                        
+                        <div className="space-y-2">
                             <Label>Ministérios</Label>
                             <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border rounded-md">
                                 {ministries.map((m) => (
@@ -213,16 +318,42 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                                 ))}
                                 {ministries.length === 0 && (
                                     <p className="text-sm text-muted-foreground col-span-2">
-                                        Cadastre ministérios primeiro.
+                                        Cadastre ministérios primeiro nas Configurações.
                                     </p>
                                 )}
                             </div>
                         </div>
+                        
+                        {editingVolunteer && (
+                            <div className="flex gap-2 pt-2 border-t">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="flex-1"
+                                    onClick={() => handleResetPin(editingVolunteer)}
+                                    disabled={isLoading}
+                                >
+                                    <KeyRound className="w-4 h-4 mr-2" />
+                                    Gerar Novo PIN
+                                </Button>
+                                <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => {
+                                        setVolunteerToDelete(editingVolunteer)
+                                        setShowModal(false)
+                                        setShowDeleteDialog(true)
+                                    }}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowModal(false)}>Cancelar</Button>
-                        <Button onClick={handleCreate} disabled={isLoading}>
-                            {isLoading ? "Criando..." : "Criar Voluntário"}
+                        <Button onClick={handleSave} disabled={isLoading}>
+                            {isLoading ? "Salvando..." : (editingVolunteer ? "Salvar" : "Criar")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -232,7 +363,9 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
             <Dialog open={showPinModal} onOpenChange={setShowPinModal}>
                 <DialogContent className="max-w-sm text-center">
                     <DialogHeader>
-                        <DialogTitle className="text-center">Voluntário Criado!</DialogTitle>
+                        <DialogTitle className="text-center">
+                            {editingVolunteer ? 'Novo PIN Gerado!' : 'Membro Criado!'}
+                        </DialogTitle>
                     </DialogHeader>
                     <div className="py-6">
                         <p className="text-sm text-muted-foreground mb-4">
@@ -247,7 +380,7 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                             </Button>
                         </div>
                         <p className="text-xs text-muted-foreground mt-4">
-                            Anote este PIN! Ele será usado para o voluntário acessar o sistema.
+                            Anote este PIN! O voluntário usará este código para acessar o sistema.
                         </p>
                     </div>
                     <DialogFooter>
@@ -257,6 +390,24 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            
+            {/* Delete Confirmation */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir membro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. O membro <strong>{volunteerToDelete?.name}</strong> será removido permanentemente do sistema.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white hover:bg-destructive/90">
+                            Excluir
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
