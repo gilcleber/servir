@@ -48,7 +48,10 @@ export async function loginVolunteer(pin: string) {
     }
 
     // Success
-    return { success: true }
+    const role = profile.role || 'volunteer'
+    const redirectTo = (role === 'leader' || role === 'admin') ? '/leader' : '/volunteer'
+
+    return { success: true, role, redirectTo }
 }
 
 export async function loginLeader(formData: FormData) {

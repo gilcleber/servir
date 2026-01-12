@@ -27,7 +27,12 @@ export default function VolunteerLoginPage() {
             toast.error(result.error)
         } else {
             toast.success("Bem-vindo!")
-            router.push("/volunteer")
+            // Force reload to ensure middleware/session updates if needed, or just push
+            if (result.redirectTo) {
+                router.push(result.redirectTo)
+            } else {
+                router.push("/volunteer")
+            }
         }
 
         setIsLoading(false)
