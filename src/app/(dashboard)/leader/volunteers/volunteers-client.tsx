@@ -192,59 +192,65 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                 </Button>
             </div>
 
-            {/* Volunteers Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredVolunteers.map((v) => (
-                    <Card
-                        key={v.id}
-                        className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => openModal(v)}
-                    >
-                        <CardContent className="pt-4">
-                            <div className="flex items-start gap-3">
-                                <Avatar className="h-12 w-12 border-2 border-primary/20">
-                                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                        {v.name?.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold truncate">{v.name}</p>
-                                        {v.role === 'leader' && (
-                                            <Badge variant="default" className="text-[10px] py-0">Líder</Badge>
-                                        )}
-                                    </div>
+            {/* Hierarchy Sections */}
+            <div className="space-y-8">
+                {/* 1. Liderança Sênior (Principal) */}
+                {filteredVolunteers.some(v => v.email === 'gilcleberlocutor@gmail.com') && (
+                    <section>
+                        <h3 className="text-lg font-bold mb-4 flex items-center text-primary">
+                            <span className="bg-primary/10 p-1 rounded-md mr-2">👑</span>
+                            Liderança Sênior
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredVolunteers
+                                .filter(v => v.email === 'gilcleberlocutor@gmail.com')
+                                .map(v => (
+                                    <VolunteerCard key={v.id} v={v} onClick={() => openModal(v)} getMinistryNames={getMinistryNames} isPastor={true} />
+                                ))
+                            }
+                        </div>
+                    </section>
+                )}
 
-                                    {v.email && (
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                            <Mail className="w-3 h-3" />
-                                            <span className="truncate">{v.email}</span>
-                                        </div>
-                                    )}
+                {/* 2. Líderes de Ministério */}
+                {filteredVolunteers.some(v => v.role === 'leader' && v.email !== 'gilcleberlocutor@gmail.com') && (
+                    <section>
+                        <h3 className="text-lg font-bold mb-4 flex items-center">
+                            <span className="bg-blue-100 p-1 rounded-md mr-2 text-blue-600">👔</span>
+                            Líderes de Ministério
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredVolunteers
+                                .filter(v => v.role === 'leader' && v.email !== 'gilcleberlocutor@gmail.com')
+                                .map(v => (
+                                    <VolunteerCard key={v.id} v={v} onClick={() => openModal(v)} getMinistryNames={getMinistryNames} />
+                                ))
+                            }
+                        </div>
+                    </section>
+                )}
 
-                                    {v.phone && (
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                            <Phone className="w-3 h-3" />
-                                            <span>{v.phone}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {getMinistryNames(v.ministry_ids).map((name, i) => (
-                                            <Badge key={i} variant="secondary" className="text-[10px] py-0">
-                                                {name}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                {/* 3. Voluntários */}
+                {filteredVolunteers.some(v => v.role === 'volunteer') && (
+                    <section>
+                        <h3 className="text-lg font-bold mb-4 flex items-center text-muted-foreground">
+                            <span className="bg-gray-100 p-1 rounded-md mr-2">❤️</span>
+                            Voluntários
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredVolunteers
+                                .filter(v => v.role === 'volunteer')
+                                .map(v => (
+                                    <VolunteerCard key={v.id} v={v} onClick={() => openModal(v)} getMinistryNames={getMinistryNames} />
+                                ))
+                            }
+                        </div>
+                    </section>
+                )}
 
                 {filteredVolunteers.length === 0 && (
                     <p className="text-muted-foreground col-span-3 text-center py-12">
-                        {searchTerm ? "Nenhum voluntário encontrado." : "Nenhum voluntário cadastrado ainda."}
+                        {searchTerm ? "Nenhum membro encontrado." : "Nenhum membro cadastrado ainda."}
                     </p>
                 )}
             </div>
@@ -412,5 +418,58 @@ export function VolunteersClient({ volunteers, ministries, churchId }: Volunteer
                 </AlertDialogContent>
             </AlertDialog>
         </div>
+    )
+}
+
+function VolunteerCard({ v, onClick, getMinistryNames, isPastor }: { v: any, onClick: () => void, getMinistryNames: (ids: string[]) => string[], isPastor?: boolean }) {
+    return (
+        <Card
+            className={`border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${isPastor ? 'bg-amber-50/50 border-amber-200 border' : ''}`}
+            onClick={onClick}
+        >
+            <CardContent className="pt-4">
+                <div className="flex items-start gap-3">
+                    <Avatar className={`h-12 w-12 border-2 ${isPastor ? 'border-amber-500' : 'border-primary/20'}`}>
+                        <AvatarFallback className={`${isPastor ? 'bg-amber-100 text-amber-900' : 'bg-primary/10 text-primary'} font-bold`}>
+                            {v.name?.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <p className="font-semibold truncate">{v.name}</p>
+                            {isPastor ? (
+                                <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px] py-0 border-0">Pastor</Badge>
+                            ) : (
+                                v.role === 'leader' && (
+                                    <Badge variant="default" className="text-[10px] py-0">Líder</Badge>
+                                )
+                            )}
+                        </div>
+
+                        {v.email && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Mail className="w-3 h-3" />
+                                <span className="truncate">{v.email}</span>
+                            </div>
+                        )}
+
+                        {v.phone && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Phone className="w-3 h-3" />
+                                <span>{v.phone}</span>
+                            </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-1 mt-2">
+                            {getMinistryNames(v.ministry_ids).map((name, i) => (
+                                <Badge key={i} variant="secondary" className="text-[10px] py-0">
+                                    {name}
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     )
 }
