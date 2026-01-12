@@ -99,8 +99,18 @@ export async function updateAvailability(date: string, status: 'available' | 'un
         .single()
 
     if (!profile) return { error: 'Perfil não encontrado.' }
-    if (!profile.church_id) {
-        return { error: 'Atenção: Seu cadastro não tem Igreja vinculada (church_id nulo).' }
+
+    let churchId = profile.church_id
+    if (!churchId) {
+        // Fallback: Fetch the first church in the system (Prototype/Fix for "Fake Pastor")
+        const { data: church } = await supabase.from('churches').select('id').limit(1).single()
+        if (church) {
+            churchId = church.id
+            // Optional: Auto-fix profile
+            // await supabase.from('profiles').update({ church_id: church.id }).eq('id', profile.id)
+        } else {
+            return { error: 'Erro crítico: Nenhuma igreja encontrada no sistema.' }
+        }
     }
 
     const { error: upsertError } = await supabase
@@ -109,7 +119,7 @@ export async function updateAvailability(date: string, status: 'available' | 'un
             profile_id: profile.id,
             date,
             status,
-            church_id: profile.church_id
+            church_id: churchId
         }, {
             onConflict: 'profile_id,date'
         })

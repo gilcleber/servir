@@ -12,15 +12,15 @@ export default function VolunteerLayout({ children }: { children: React.ReactNod
                     <Home className="w-6 h-6" />
                     Início
                 </Link>
-                <Link href="#" className="flex flex-col items-center text-gray-400 hover:text-primary text-xs gap-1 font-medium transition-colors">
+                <Link href="/volunteer" className="flex flex-col items-center text-primary text-xs gap-1 font-medium">
                     <Calendar className="w-6 h-6" />
                     Escalas
                 </Link>
-                <Link href="#" className="flex flex-col items-center text-gray-400 hover:text-primary text-xs gap-1 font-medium transition-colors">
+                <Link href="/volunteer/alerts" className="flex flex-col items-center text-gray-400 hover:text-primary text-xs gap-1 font-medium transition-colors">
                     <Bell className="w-6 h-6" />
                     Alertas
                 </Link>
-                <Link href="#" className="flex flex-col items-center text-gray-400 hover:text-primary text-xs gap-1 font-medium transition-colors">
+                <Link href="/volunteer/profile" className="flex flex-col items-center text-gray-400 hover:text-primary text-xs gap-1 font-medium transition-colors">
                     <User className="w-6 h-6" />
                     Perfil
                 </Link>

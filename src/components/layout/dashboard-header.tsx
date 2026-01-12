@@ -73,13 +73,17 @@ export function DashboardHeader({ userEmail, userName, role }: DashboardHeaderPr
                                 </p>
                             </div>
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href="/leader/settings" className="cursor-pointer">
-                                <Settings className="mr-2 h-4 w-4" />
-                                <span>Configurações</span>
-                            </Link>
-                        </DropdownMenuItem>
+                        {(role === 'leader' || role === 'admin') && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                    <Link href="/leader/settings" className="cursor-pointer">
+                                        <Settings className="mr-2 h-4 w-4" />
+                                        <span>Configurações</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => logout()}>
                             <LogOut className="mr-2 h-4 w-4" />
