@@ -66,7 +66,7 @@ export default async function LeaderDashboard() {
                 </div>
 
                 {/* Actions */}
-                <LeaderActions />
+                <LeaderActions userEmail={user.email} role={user.user_metadata?.role} />
 
                 {/* Active Schedules */}
                 <section>

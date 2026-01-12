@@ -4,15 +4,25 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Plus, UserPlus, Church, CalendarPlus } from "lucide-react"
 
-export function LeaderActions() {
+interface LeaderActionsProps {
+    userEmail?: string
+    role?: string
+}
+
+export function LeaderActions({ userEmail, role }: LeaderActionsProps) {
+    const isPastor = userEmail === 'gilcleberlocutor@gmail.com'
+    const canManageMinistries = isPastor || role === 'admin' || role === 'super_admin'
+
     return (
         <div className="flex flex-col md:flex-row gap-4">
             {/* Primary Action for Senior Pastor: Manage Ministries */}
-            <Button asChild className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/10">
-                <Link href="/leader/settings">
-                    <Church className="w-5 h-5 mr-2" /> Ministérios
-                </Link>
-            </Button>
+            {canManageMinistries && (
+                <Button asChild className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/10">
+                    <Link href="/leader/settings">
+                        <Church className="w-5 h-5 mr-2" /> Ministérios
+                    </Link>
+                </Button>
+            )}
 
             {/* Secondary Actions */}
             <Button asChild variant="outline" className="flex-1 h-12 text-base font-semibold bg-white border">
