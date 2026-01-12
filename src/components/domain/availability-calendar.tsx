@@ -12,9 +12,11 @@ export function AvailabilityCalendar() {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
     const [availabilities, setAvailabilities] = useState<Record<string, AvailabilityStatus>>({})
 
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
+
     useEffect(() => {
         const load = async () => {
-            const data = await fetchAvailability(new Date().getFullYear(), new Date().getMonth() + 1)
+            const data = await fetchAvailability(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
             const map: Record<string, AvailabilityStatus> = {}
             data.forEach((item: any) => {
                 map[item.date] = item.status
@@ -22,7 +24,7 @@ export function AvailabilityCalendar() {
             setAvailabilities(map)
         }
         load()
-    }, [])
+    }, [currentMonth])
 
     const handleSelect = async (date: Date | undefined) => {
         if (!date) return
@@ -57,6 +59,7 @@ export function AvailabilityCalendar() {
                 selected={selectedDate}
                 onSelect={handleSelect}
                 className="rounded-md border shadow-sm w-full flex justify-center"
+                onMonthChange={setCurrentMonth}
                 modifiers={{
                     available: (date) => availabilities[date.toISOString().split('T')[0]] === 'available',
                     unavailable: (date) => availabilities[date.toISOString().split('T')[0]] === 'unavailable',
