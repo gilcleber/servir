@@ -12,6 +12,10 @@ export async function createVolunteer(
     churchId: string,
     role: 'volunteer' | 'leader' = 'volunteer'
 ) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Não autorizado.' }
+
     const supabaseAdmin = createAdminClient()
 
     // 1. Generate PIN
@@ -65,6 +69,10 @@ export async function updateVolunteer(
     ministries: string[],
     role: 'volunteer' | 'leader'
 ) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Não autorizado.' }
+
     const supabaseAdmin = createAdminClient()
 
     const updateData: any = {
@@ -99,6 +107,10 @@ export async function updateVolunteer(
 }
 
 export async function resetVolunteerPin(profileId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Não autorizado.' }
+
     const supabaseAdmin = createAdminClient()
 
     // Generate new PIN
@@ -129,6 +141,10 @@ export async function resetVolunteerPin(profileId: string) {
 }
 
 export async function deleteVolunteer(profileId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Não autorizado.' }
+
     const supabaseAdmin = createAdminClient()
 
     // Delete auth user (profile will cascade because of FK constraint usually, but we check)
