@@ -94,24 +94,13 @@ export async function updateAvailability(date: string, status: 'available' | 'un
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('id, church_id')
+        .select('id')
         .eq('email', user.email!)
         .single()
 
     if (!profile) return { error: 'Perfil não encontrado.' }
 
-    let churchId = profile.church_id
-    if (!churchId) {
-        // Fallback: Fetch the first church in the system (Prototype/Fix for "Fake Pastor")
-        const { data: church } = await supabase.from('churches').select('id').limit(1).single()
-        if (church) {
-            churchId = church.id
-            // Optional: Auto-fix profile
-            // await supabase.from('profiles').update({ church_id: church.id }).eq('id', profile.id)
-        } else {
-            return { error: 'Erro crítico: Nenhuma igreja encontrada no sistema.' }
-        }
-    }
+    if (!profile) return { error: 'Perfil não encontrado.' }
 
     const { error: upsertError } = await supabase
         .from('availability')
@@ -119,7 +108,7 @@ export async function updateAvailability(date: string, status: 'available' | 'un
             profile_id: profile.id,
             date,
             status,
-            church_id: churchId
+            // church_id removed as it doesn't exist in availability table schema
         }, {
             onConflict: 'profile_id,date'
         })
